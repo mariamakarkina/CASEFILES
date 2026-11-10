@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEFILES — Доска расследования</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+:root {
+    --bg:#0b0b0d; --surface:#141417; --surface2:#1b1b20; --border:#2a2a30;
+    --text:#eeeeef; --muted:#92929b; --red:#a32635; --red-light:#d04450;
+    --green:#6eaa83; --gold:#c4a36a;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,sans-serif; min-height:100vh; }
+header { height:76px; padding:0 7%; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:#0d0d0f; }
+.logo { font:600 22px 'IBM Plex Mono',monospace; letter-spacing:3px; color:var(--text); text-decoration:none; }
+.logo span { color:var(--red-light); }
+.header-label,.mono { color:var(--muted); font:11px 'IBM Plex Mono',monospace; letter-spacing:1.5px; }
+.container { width:min(1180px,90%); margin:0 auto; padding:42px 0 75px; }
+.back { display:inline-block; margin-bottom:28px; color:var(--muted); text-decoration:none; font:12px 'IBM Plex Mono',monospace; }
+.back:hover { color:var(--red-light); }
+.eyebrow { color:var(--red-light); font:12px 'IBM Plex Mono',monospace; letter-spacing:3px; margin-bottom:12px; }
+h1 { margin:0 0 12px; font-size:clamp(30px,5vw,46px); letter-spacing:-1px; }
+.intro { max-width:760px; color:var(--muted); font-size:14px; line-height:1.8; margin:0; }
+.case-strip { margin:25px 0 30px; padding:17px 20px; background:var(--surface); border:1px solid var(--border); display:flex; justify-content:space-between; gap:15px; flex-wrap:wrap; }
+.case-strip strong { font-size:14px; }
+.case-strip span { color:var(--muted); font:11px 'IBM Plex Mono',monospace; }
+.workspace { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:22px; align-items:start; }
+.board-panel,.form-panel,.side-panel { background:var(--surface); border:1px solid var(--border); }
+.panel-head { padding:18px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.panel-head h2 { margin:0; font:12px 'IBM Plex Mono',monospace; letter-spacing:1.5px; }
+.count { color:var(--red-light); font:11px 'IBM Plex Mono',monospace; }
+.connections { padding:18px; display:grid; gap:12px; min-height:190px; }
+.empty { color:var(--muted); font-size:13px; line-height:1.8; padding:20px 10px; text-align:center; border:1px dashed #393940; }
+.connection { position:relative; padding:18px; background:linear-gradient(135deg,#121215,#0e0e11); border:1px solid #393940; transition:.2s; }
+.connection::before { content:""; position:absolute; left:-1px; top:18px; bottom:18px; width:2px; background:var(--red); opacity:.85; }
+.connection:hover { border-color:#5a3940; box-shadow:0 8px 24px rgba(0,0,0,.22); }
+.connection-top { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+.connection-tag { color:var(--gold); font:10px 'IBM Plex Mono',monospace; letter-spacing:1px; }
+.delete { border:0; background:transparent; color:#777780; cursor:pointer; font-size:18px; }
+.delete:hover { color:var(--red-light); }
+.connection-flow { display:grid; grid-template-columns:minmax(0,1fr) minmax(90px,.42fr) minmax(0,1fr); align-items:center; gap:12px; }
+.node { position:relative; z-index:1; min-width:0; min-height:76px; display:flex; flex-direction:column; justify-content:center; padding:13px 14px; background:linear-gradient(145deg,#202027,#151519); border:1px solid #41414a; box-shadow:0 5px 18px rgba(0,0,0,.2); }
+.node:first-child { border-left:3px solid #777780; }
+.node:last-child { border-right:3px solid var(--red-light); }
+.node small { display:block; color:var(--muted); font:9px 'IBM Plex Mono',monospace; margin-bottom:7px; letter-spacing:1px; }
+.node strong { display:block; font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.arrow { position:relative; min-width:90px; height:54px; display:flex; align-items:center; justify-content:center; color:var(--red-light); font:9px 'IBM Plex Mono',monospace; text-align:center; }
+.arrow::before { content:""; position:absolute; left:-12px; right:-12px; top:50%; height:2px; transform:translateY(-50%); background:linear-gradient(90deg,#777780,var(--red-light)); box-shadow:0 0 10px rgba(208,68,80,.35); }
+.arrow::after { content:""; position:absolute; right:-12px; top:50%; width:8px; height:8px; border-top:2px solid var(--red-light); border-right:2px solid var(--red-light); transform:translateY(-50%) rotate(45deg); }
+.arrow span { position:relative; z-index:1; max-width:100%; padding:7px 8px; background:#101013; border:1px solid #493038; color:#e5a0a6; line-height:1.4; overflow-wrap:anywhere; }
+.connection-note { color:#b9b9c1; font-size:12px; line-height:1.7; margin:12px 0 0; padding-left:12px; border-left:2px solid #49414a; }
+.sidebar { display:grid; gap:18px; }
+.form-body { padding:20px; }
+label { display:block; margin:0 0 8px; color:var(--muted); font:10px 'IBM Plex Mono',monospace; letter-spacing:1px; }
+select,textarea { width:100%; padding:12px; color:var(--text); background:#0d0d10; border:1px solid #34343b; outline:none; font:13px Inter,sans-serif; border-radius:0; }
+select:focus,textarea:focus { border-color:var(--red); }
+.field { margin-bottom:16px; }
+textarea { min-height:92px; resize:vertical; line-height:1.6; }
+.add-button,.secondary-button { width:100%; padding:14px 16px; border:1px solid var(--red); background:var(--red); color:white; cursor:pointer; font:600 11px 'IBM Plex Mono',monospace; letter-spacing:1px; transition:.2s; }
+.add-button:hover { background:var(--red-light); }
+.hint { color:var(--muted); font-size:11px; line-height:1.7; margin:14px 0 0; }
+.side-body { padding:18px 20px; }
+.side-body p { margin:0; color:var(--muted); font-size:12px; line-height:1.8; }
+.quick-list { display:grid; gap:8px; margin-top:14px; }
+.quick-link { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); color:#d6d6dc; text-decoration:none; font-size:12px; }
+.quick-link span:last-child { color:var(--red-light); }
+.footer-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.secondary-button { width:auto; background:#202026; border-color:#45454d; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+.secondary-button:hover { border-color:var(--red-light); }
+.toast { min-height:18px; margin-top:12px; color:var(--green); font:10px 'IBM Plex Mono',monospace; }
+footer { padding:25px 7%; border-top:1px solid var(--border); color:#66666e; font:10px 'IBM Plex Mono',monospace; letter-spacing:2px; text-align:center; }
+@media(max-width:850px) { .workspace { grid-template-columns:1fr; } .sidebar { grid-template-columns:1fr 1fr; } }
+@media(max-width:600px) {
+    header { padding:0 5%; }
+    .header-label { display:none; }
+    .sidebar { grid-template-columns:1fr; }
+    .connection-flow { grid-template-columns:1fr; gap:7px; }
+    .arrow { width:100%; min-height:36px; height:36px; transform:none; justify-self:stretch; }
+    .arrow::before { left:50%; right:auto; top:-7px; width:2px; height:50px; transform:none; background:linear-gradient(180deg,#777780,var(--red-light)); }
+    .arrow::after { right:auto; left:calc(50% - 3px); top:auto; bottom:-7px; transform:rotate(135deg); }
+    .arrow span { padding:5px 9px; }
+    .node { min-height:65px; }
+    .container { padding-top:30px; }
+}
+</style>
+</head>
+<body>
+<header>
+    <a href="index.html" class="logo">CASE<span>FILES</span></a>
+    <div class="header-label">СИСТЕМА АНАЛИЗА ДОКАЗАТЕЛЬСТВ / 2026</div>
+</header>
+<main class="container">
+    <a class="back" id="backLink" href="#">← НАЗАД К РАССЛЕДОВАНИЮ</a>
+    <div class="eyebrow" id="caseNumber">CASE №001 / EVIDENCE BOARD</div>
+    <h1>Доска расследования</h1>
+    <p class="intro">Сопоставляй найденные материалы с подозреваемыми. Создавай собственные связи, отмечай противоречия и записывай, почему определённый факт может быть важен. Связи сохраняются отдельно для каждого дела на этом устройстве.</p>
+    <div class="case-strip">
+        <strong id="caseTitle">Загрузка дела...</strong>
+        <span>ЛИЧНАЯ РАБОЧАЯ ДОСКА СЛЕДОВАТЕЛЯ</span>
+    </div>
+    <div class="workspace">
+        <section class="board-panel">
+            <div class="panel-head">
+                <h2>ЗАФИКСИРОВАННЫЕ СВЯЗИ</h2>
+                <span class="count" id="connectionCount">0 СВЯЗЕЙ</span>
+            </div>
+            <div class="connections" id="connections"></div>
+        </section>
+        <aside class="sidebar">
+            <section class="form-panel">
+                <div class="panel-head"><h2>ДОБАВИТЬ СВЯЗЬ</h2></div>
+                <div class="form-body">
+                    <form id="connectionForm">
+                        <div class="field">
+                            <label for="materialSelect">МАТЕРИАЛ / ДОКАЗАТЕЛЬСТВО</label>
+                            <select id="materialSelect" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="suspectSelect">ПОДОЗРЕВАЕМЫЙ</label>
+                            <select id="suspectSelect" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="relationSelect">ТИП СВЯЗИ</label>
+                            <select id="relationSelect" required>
+                                <option value="Указывает на возможный контакт">Указывает на возможный контакт</option>
+                                <option value="Противоречит показаниям">Противоречит показаниям</option>
+                                <option value="Возможный мотив">Возможный мотив</option>
+                                <option value="Цифровой след">Цифровой след</option>
+                                <option value="Требует дополнительной проверки">Требует дополнительной проверки</option>
+                                <option value="Может подтвердить алиби">Может подтвердить алиби</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="connectionNote">ПОЧЕМУ ТЫ СВЯЗЫВАЕШЬ ЭТИ ФАКТЫ?</label>
+                            <textarea id="connectionNote" placeholder="Например: отпечатки подозреваемого обнаружены на предмете, но это ещё не доказывает его присутствие в момент происшествия."></textarea>
+                        </div>
+                        <button class="add-button" type="submit">ЗАКРЕПИТЬ СВЯЗЬ +</button>
+                        <div class="toast" id="saveStatus" aria-live="polite"></div>
+                    </form>
+                    <p class="hint">Важно: связь — это твоя версия, а не установленный факт. Не делай вывод о виновности только по одному совпадению.</p>
+                </div>
+            </section>
+            <section class="side-panel">
+                <div class="panel-head"><h2>БЫСТРЫЙ ДОСТУП</h2></div>
+                <div class="side-body">
+                    <p>Открывай профили подозреваемых или возвращайся к исходным материалам.</p>
+                    <div class="quick-list" id="suspectLinks"></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+    <div class="footer-actions">
+        <a class="secondary-button" id="backMaterials" href="#">← К МАТЕРИАЛАМ</a>
+        <a class="secondary-button" id="backVerdict" href="#">ПЕРЕЙТИ К ВЕРДИКТУ →</a>
+    </div>
+</main>
+<footer>CASEFILES © 2026 — ДОСКА АНАЛИЗА ДОКАЗАТЕЛЬСТВ</footer>
+<script>
+const allCases = {
+
+1: {
+    number: "CASE №001",
+    title: "Последний звонок",
+    description: "Владелец IT-компании Андрей Волков найден мёртвым в собственной квартире. Следствие рассматривает четыре версии. Изучите цифровые следы, документы и показания подозреваемых, чтобы восстановить события последнего вечера.",
+
+    evidence: [
+        {
+            title: "Телефон жертвы",
+            description: "Последняя активность устройства Андрея Волкова.",
+            body: "Телефон Андрея найден на кухонном столе. Последнее исходящее сообщение отправлено в 22:41.\n\nТекст сообщения: «Нам нужно поговорить. Я всё узнал».\n\nПолучатель не сохранён в контактах. Сообщение было прочитано в 22:46, но ответа не последовало.\n\nВ 23:08 устройство перестало выходить в сеть.",
+            meta: "ОБЪЕКТ: МОБИЛЬНЫЙ ТЕЛЕФОН / ВРЕМЯ: 22:41"
+        },
+        {
+            title: "Следы на ноутбуке",
+            description: "Последние действия на рабочем компьютере.",
+            body: "На ноутбуке Волкова обнаружена открытая переписка с корпоративного аккаунта.\n\nЗа час до смерти кто-то пытался удалить несколько сообщений. История входов показывает подключение к системе в 22:17.\n\nУстройство было разблокировано с использованием учётной записи администратора.\n\nВ журнале также обнаружено подключение внешнего накопителя.",
+            meta: "ОБЪЕКТ: НОУТБУК / ЦИФРОВАЯ ЭКСПЕРТИЗА"
+        },
+        {
+            title: "Камера подъезда",
+            description: "Запись видеонаблюдения за вечер происшествия.",
+            body: "Камера подъезда зафиксировала четырёх посетителей в день происшествия.\n\n18:32 — Дмитрий Орлов покинул здание.\n19:14 — Елена Морозова вошла в подъезд.\n20:03 — неизвестный человек в капюшоне поднялся на этаж Волкова.\n21:26 — Максим Соколов вышел из здания.\n\nЛицо неизвестного посетителя не удалось распознать.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №04"
+        },
+        {
+            title: "Отпечатки на стакане",
+            description: "Результаты криминалистической экспертизы.",
+            body: "На стакане, найденном рядом с рабочим столом, обнаружены два набора отпечатков.\n\nПервый принадлежит Андрею Волкову.\n\nВторой частично совпадает с отпечатками Дмитрия Орлова. Эксперт отмечает, что стакан мог использоваться несколькими людьми в разное время.\n\nНа поверхности также обнаружены следы чистящего средства.",
+            meta: "ОБЪЕКТ: СТАКАН / ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Отчёт о вскрытии",
+            description: "Предварительное заключение судебно-медицинской экспертизы.",
+            body: "Пострадавший: Андрей Волков.\n\nПредполагаемое время смерти: с 22:00 до 23:30.\n\nНа теле обнаружены признаки насильственной смерти. Следов взлома на входной двери квартиры не выявлено.\n\nВремя смерти не позволяет однозначно определить, кто из посетителей находился в квартире последним.\n\nОкончательное заключение требует дополнительных исследований.",
+            meta: "ДОКУМЕНТ: МЕДИЦИНСКОЕ ЗАКЛЮЧЕНИЕ"
+        },
+        {
+            title: "Корпоративный контракт",
+            description: "Документ о распределении долей в IT-компании.",
+            body: "Согласно договору, Андрей Волков владел 60% компании, Дмитрий Орлов — 40%.\n\nЗа неделю до происшествия Волков инициировал пересмотр условий партнёрства.\n\nВ приложении к договору обнаружены исправления, сделанные от руки. Подпись на одной из страниц вызывает сомнения у эксперта.\n\nВозможный мотив: финансовый конфликт между партнёрами.",
+            meta: "ДОКУМЕНТ: ДОГОВОР №IT-204"
+        },
+        {
+            title: "Журнал системного доступа",
+            description: "Список входов сотрудников в корпоративную сеть.",
+            body: "В журнале зафиксированы следующие события:\n\n21:52 — вход под учётной записью администратора.\n22:17 — удалённое подключение к серверу.\n22:23 — изменение прав доступа к архиву.\n22:39 — попытка удаления журнала событий.\n\nУчётная запись принадлежит системному администратору Максиму Соколову.\n\nСамо по себе использование учётной записи не доказывает, что вход выполнял её владелец.",
+            meta: "ДОКУМЕНТ: СИСТЕМНЫЙ ЖУРНАЛ"
+        },
+        {
+            title: "Переписка с Еленой",
+            description: "Сообщения между Волковым и его бывшей девушкой.",
+            body: "Из переписки следует, что отношения Андрея и Елены закончились конфликтом.\n\nПоследнее сообщение от Елены: «Ты не можешь просто так вычеркнуть меня из своей жизни».\n\nАндрей ответил: «Я больше не хочу возвращаться к этому».\n\nВ день происшествия Елена звонила ему трижды. Два звонка остались без ответа.",
+            meta: "ДОКУМЕНТ: ВЫГРУЗКА ПЕРЕПИСКИ"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Дмитрий Орлов",
+            description: "Бизнес-партнёр погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз видели Андрея?\n\nОРЛОВ: В тот день, около шести вечера. Мы обсуждали дела компании.\n\nСЛЕДОВАТЕЛЬ: О чём был спор?\n\nОРЛОВ: О деньгах. Андрей хотел изменить условия нашего соглашения. Но это обычные рабочие разногласия.\n\nСЛЕДОВАТЕЛЬ: Вы возвращались в квартиру вечером?\n\nОРЛОВ: Нет. После встречи я сразу поехал домой.\n\nСЛЕДОВАТЕЛЬ: Почему ваши отпечатки нашли на стакане?\n\nОРЛОВ: Я бывал у Андрея много раз. Не вижу в этом ничего странного.\n\nПРИМЕЧАНИЕ: Орлов подтверждает финансовый конфликт, но отрицает возвращение в квартиру.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ДМИТРИЙ ОРЛОВ"
+        },
+        {
+            title: "Допрос: Елена Морозова",
+            description: "Бывшая девушка погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Зачем вы приходили к Андрею?\n\nМОРОЗОВА: Хотела забрать свои вещи. Он давно обещал их вернуть.\n\nСЛЕДОВАТЕЛЬ: Вы ссорились?\n\nМОРОЗОВА: Да. Он сказал, что у него появилась другая жизнь и мне не стоит вмешиваться.\n\nСЛЕДОВАТЕЛЬ: Вы были в квартире после девяти вечера?\n\nМОРОЗОВА: Нет. Я ушла примерно в восемь.\n\nСЛЕДОВАТЕЛЬ: Почему продолжали ему звонить?\n\nМОРОЗОВА: Я забыла спросить про одну вещь. Он не отвечал.\n\nПРИМЕЧАНИЕ: Время ухода требует проверки по дополнительным записям.",
+            meta: "ПОДОЗРЕВАЕМАЯ: ЕЛЕНА МОРОЗОВА"
+        },
+        {
+            title: "Допрос: Максим Соколов",
+            description: "Системный администратор компании.",
+            body: "СЛЕДОВАТЕЛЬ: Почему ваша учётная запись использовалась ночью?\n\nСОКОЛОВ: Я иногда подключаюсь к серверу удалённо. Это часть моей работы.\n\nСЛЕДОВАТЕЛЬ: Вы удаляли сообщения Волкова?\n\nСОКОЛОВ: Нет. Я не имею отношения к его личной переписке.\n\nСЛЕДОВАТЕЛЬ: Вы были в его квартире?\n\nСОКОЛОВ: Да, раньше. Но в тот вечер я ушёл с работы и домой не заходил.\n\nСЛЕДОВАТЕЛЬ: Кто ещё мог использовать вашу учётную запись?\n\nСОКОЛОВ: Пароль был доступен нескольким сотрудникам для экстренного доступа.\n\nПРИМЕЧАНИЕ: Необходимо установить, с какого устройства выполнялись подключения.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: МАКСИМ СОКОЛОВ"
+        },
+        {
+            title: "Допрос: Алексей Громов",
+            description: "Сосед погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Вы слышали что-нибудь подозрительное?\n\nГРОМОВ: Около десяти вечера слышал громкий разговор. Мужской голос, потом что-то упало.\n\nСЛЕДОВАТЕЛЬ: Вы видели, кто находился в квартире?\n\nГРОМОВ: Нет. Дверь была закрыта.\n\nСЛЕДОВАТЕЛЬ: Вы знали Волкова лично?\n\nГРОМОВ: Только здоровались в подъезде.\n\nСЛЕДОВАТЕЛЬ: Почему не сообщили о шуме раньше?\n\nГРОМОВ: Сначала подумал, что обычная ссора.\n\nПРИМЕЧАНИЕ: Показания соседа могут помочь уточнить время происшествия.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: АЛЕКСЕЙ ГРОМОВ"
+        }
+    ]
+},
+
+2: {
+    number: "CASE №002",
+    title: "Исчезновение",
+    description: "Сотрудник частной организации Иван Крылов исчез после окончания рабочего дня. Его автомобиль найден неподалёку от офиса, телефон отключён. Следствие изучает маршрут, записи камер и отношения пропавшего с близкими.",
+
+    evidence: [
+        {
+            title: "Оставленный автомобиль",
+            description: "Машина Ивана обнаружена возле старого склада.",
+            body: "Автомобиль Ивана Крылова обнаружен в 06:40 утра на парковке возле заброшенного склада.\n\nДвери были закрыты, следов взлома нет. Ключи находились в салоне.\n\nНа пассажирском сиденье обнаружен конверт без адресата. Внутри — пустой лист бумаги.\n\nСледов борьбы внутри автомобиля не обнаружено.",
+            meta: "ОБЪЕКТ: АВТОМОБИЛЬ / МЕСТО: СТАРЫЙ СКЛАД"
+        },
+        {
+            title: "Последний сигнал телефона",
+            description: "Данные о последнем подключении мобильного устройства.",
+            body: "Телефон Ивана последний раз подключался к базовой станции в 21:18.\n\nСигнал зафиксирован в районе старого промышленного квартала.\n\nВ 21:23 устройство перестало отвечать на запросы сети.\n\nЗа двадцать минут до этого телефон находился возле офисного здания.",
+            meta: "ОБЪЕКТ: МОБИЛЬНОЕ УСТРОЙСТВО / 21:18"
+        },
+        {
+            title: "Камера у офиса",
+            description: "Запись с наружной камеры наблюдения.",
+            body: "Запись показывает, что Иван покинул здание в 19:06.\n\nЧерез две минуты к нему подошёл человек в тёмной куртке. Они разговаривали около трёх минут.\n\nПосле разговора Иван направился в сторону парковки.\n\nЛицо второго человека частично скрыто капюшоном.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №02"
+        },
+        {
+            title: "Блокнот Ивана",
+            description: "Личные записи, найденные в рабочем столе.",
+            body: "На последней странице блокнота обнаружена запись:\n\n«Они думают, что я ничего не знаю. Нужно поговорить с О. до пятницы».\n\nНиже записаны три номера телефонов. Один из них принадлежит руководителю организации Олегу Миронову.\n\nОстальные номера пока не установлены.",
+            meta: "ОБЪЕКТ: ЛИЧНЫЙ БЛОКНОТ / ПОСЛЕДНЯЯ СТРАНИЦА"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Табель рабочего времени",
+            description: "Официальные сведения о последнем рабочем дне.",
+            body: "Согласно табелю, Иван Крылов завершил работу в 18:00.\n\nОднако пропускная система зафиксировала его выход из здания в 19:06.\n\nВ период с 18:00 до 19:00 его пропуск использовался для входа в архивное помещение.\n\nКто именно воспользовался пропуском, установить пока не удалось.",
+            meta: "ДОКУМЕНТ: ТАБЕЛЬ №118"
+        },
+        {
+            title: "Отчёт о финансовых операциях",
+            description: "Подозрительные переводы внутри организации.",
+            body: "За последний месяц со счёта организации было выполнено несколько переводов на неизвестные счета.\n\nОбщая сумма операций превышает внутренний лимит согласования.\n\nИван Крылов имел доступ к отчётам и мог обнаружить несоответствия.\n\nВ документе отсутствует подпись ответственного сотрудника.",
+            meta: "ДОКУМЕНТ: ФИНАНСОВЫЙ ОТЧЁТ"
+        },
+        {
+            title: "Переписка с руководителем",
+            description: "Сообщения между Иваном и Олегом Мироновым.",
+            body: "ИВАН: Нам нужно обсудить переводы. Я нашёл расхождения.\n\nОЛЕГ: Не стоит делать поспешных выводов.\n\nИВАН: Я уже проверил документы. Объяснение не сходится.\n\nОЛЕГ: Приходи завтра, поговорим лично.\n\nПоследнее сообщение было отправлено в 18:52. Ответа на него нет.",
+            meta: "ДОКУМЕНТ: КОРПОРАТИВНАЯ ПЕРЕПИСКА"
+        },
+        {
+            title: "Список посещений здания",
+            description: "Информация о посетителях в день исчезновения.",
+            body: "В день исчезновения в здании зарегистрированы следующие посетители:\n\n17:40 — Антон Беляев.\n18:12 — Павел Денисов.\n18:47 — неизвестный посетитель.\n19:03 — Олег Миронов.\n\nЗапись о посещении Марии Крыловой отсутствует.\n\nДанные требуют сопоставления с видеозаписями.",
+            meta: "ДОКУМЕНТ: ЖУРНАЛ ПОСЕТИТЕЛЕЙ"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Антон Беляев",
+            description: "Коллега пропавшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз видели Ивана?\n\nБЕЛЯЕВ: В офисе, примерно в половине шестого.\n\nСЛЕДОВАТЕЛЬ: Вы ссорились?\n\nБЕЛЯЕВ: Нет. Он был напряжённым, но мы нормально общались.\n\nСЛЕДОВАТЕЛЬ: Почему вы приходили к нему в тот день?\n\nБЕЛЯЕВ: Хотел обсудить рабочую задачу.\n\nСЛЕДОВАТЕЛЬ: Вы знали о финансовых отчётах?\n\nБЕЛЯЕВ: Только то, что Иван занимался проверкой документов.\n\nПРИМЕЧАНИЕ: Беляев подтверждает встречу, но не объясняет, о чём именно говорил с Иваном.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: АНТОН БЕЛЯЕВ"
+        },
+        {
+            title: "Допрос: Олег Миронов",
+            description: "Руководитель организации.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз разговаривали с Иваном?\n\nМИРОНОВ: В день его исчезновения. Он хотел обсудить отчёты.\n\nСЛЕДОВАТЕЛЬ: Какие именно отчёты?\n\nМИРОНОВ: Обычные финансовые документы.\n\nСЛЕДОВАТЕЛЬ: Вы встречались с ним после работы?\n\nМИРОНОВ: Нет. Я задержался в офисе, но Ивана уже не было.\n\nСЛЕДОВАТЕЛЬ: Почему он написал, что хочет поговорить с вами до пятницы?\n\nМИРОНОВ: Не знаю, возможно, речь шла о работе.\n\nПРИМЕЧАНИЕ: Руководитель подтверждает конфликт вокруг документов, но отрицает личную встречу.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ОЛЕГ МИРОНОВ"
+        },
+        {
+            title: "Допрос: Павел Денисов",
+            description: "Друг детства Ивана.",
+            body: "СЛЕДОВАТЕЛЬ: Зачем вы приходили в офис?\n\nДЕНИСОВ: Иван попросил меня заехать. Сказал, что ему нужна помощь.\n\nСЛЕДОВАТЕЛЬ: О чём он хотел поговорить?\n\nДЕНИСОВ: О какой-то проблеме на работе. Подробностей не рассказал.\n\nСЛЕДОВАТЕЛЬ: Вы видели его после семи вечера?\n\nДЕНИСОВ: Нет. Я ушёл раньше.\n\nСЛЕДОВАТЕЛЬ: Он выглядел испуганным?\n\nДЕНИСОВ: Скорее обеспокоенным. Постоянно смотрел на телефон.\n\nПРИМЕЧАНИЕ: Денисов может знать о причинах беспокойства Ивана.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ПАВЕЛ ДЕНИСОВ"
+        },
+        {
+            title: "Допрос: Мария Крылова",
+            description: "Сестра пропавшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз общались с братом?\n\nМАРИЯ: В тот день утром. Он сказал, что вечером задержится.\n\nСЛЕДОВАТЕЛЬ: Он рассказывал о проблемах?\n\nМАРИЯ: Да, говорил, что обнаружил что-то странное в документах.\n\nСЛЕДОВАТЕЛЬ: Он называл имена?\n\nМАРИЯ: Нет. Сказал, что пока не может никому доверять.\n\nСЛЕДОВАТЕЛЬ: Почему вы не сообщили об этом раньше?\n\nМАРИЯ: Я не думала, что всё настолько серьёзно.\n\nПРИМЕЧАНИЕ: Мария подтверждает, что Иван опасался последствий своей проверки.",
+            meta: "ПОДОЗРЕВАЕМАЯ: МАРИЯ КРЫЛОВА"
+        }
+    ]
+},
+
+3: {
+    number: "CASE №003",
+    title: "Чужая подпись",
+    description: "Из организации пропала крупная сумма денег. Финансовые документы подтверждают проведение операций, однако сотрудник, чья подпись стоит на разрешениях, отрицает своё участие. Следствие должно установить, кто подделал документы и куда ушли средства.",
+
+    evidence: [
+        {
+            title: "Подпись на платёжном поручении",
+            description: "Спорная подпись в финансовом документе.",
+            body: "На платёжном поручении №784 обнаружена подпись сотрудника бухгалтерии Ольги Смирновой.\n\nОльга утверждает, что не подписывала документ.\n\nПочерковедческая экспертиза выявила отличия в наклоне букв и характере завершающего штриха.\n\nПредположительно, подпись могла быть скопирована с другого документа.",
+            meta: "ОБЪЕКТ: ПЛАТЁЖНОЕ ПОРУЧЕНИЕ №784"
+        },
+        {
+            title: "Флеш-накопитель",
+            description: "Носитель данных, найденный в кабинете.",
+            body: "В ящике рабочего стола обнаружен USB-накопитель.\n\nНа нём находятся сканы договоров, несколько таблиц и изображения подписей сотрудников.\n\nПоследний файл был создан за два дня до проведения спорной операции.\n\nИмя пользователя, сохранившего файл, совпадает с учётной записью секретаря Анастасии Волковой.",
+            meta: "ОБЪЕКТ: USB-НАКОПИТЕЛЬ / ЦИФРОВАЯ ЭКСПЕРТИЗА"
+        },
+        {
+            title: "Запись с камеры коридора",
+            description: "Перемещения сотрудников в день операции.",
+            body: "Камера коридора зафиксировала посещение финансового отдела.\n\n09:15 — Ольга Смирнова вошла в кабинет.\n10:02 — Игорь Васильев покинул помещение.\n10:28 — Анастасия Волкова вошла в кабинет.\n11:04 — Сергей Павлов вышел из здания.\n\nЗапись из самого кабинета отсутствует.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №07"
+        },
+        {
+            title: "Черновик договора",
+            description: "Неутверждённая версия документа с исправлениями.",
+            body: "В архиве найден черновик договора с подрядчиком.\n\nВ документе указаны реквизиты, отличающиеся от реквизитов в официальной версии.\n\nИзменения были внесены за день до перевода средств.\n\nВ свойствах файла указано, что последним редактором был пользователь с именем «admin-office».\n\nЛичность пользователя ещё предстоит установить.",
+            meta: "ОБЪЕКТ: ЭЛЕКТРОННЫЙ ДОКУМЕНТ / ЧЕРНОВИК"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Банковская выписка",
+            description: "Движение денежных средств организации.",
+            body: "В течение трёх дней со счёта организации были выполнены четыре перевода.\n\nПолучатель — компания, ранее не сотрудничавшая с организацией.\n\nОбщая сумма переводов превышает установленный лимит.\n\nВсе операции были проведены на основании платёжных поручений с подписью Ольги Смирновой.\n\nБанк подтвердил исполнение операций.",
+            meta: "ДОКУМЕНТ: БАНКОВСКАЯ ВЫПИСКА"
+        },
+        {
+            title: "Договор с подрядчиком",
+            description: "Официальное соглашение о выполнении работ.",
+            body: "Договор заключён между организацией и компанией «ТехноСервис».\n\nПредмет соглашения — обслуживание серверного оборудования.\n\nСтоимость услуг значительно превышает среднюю рыночную цену.\n\nВ приложении отсутствует подробная смета работ.\n\nПодпись подрядчика визуально отличается от подписи в предыдущих договорах.",
+            meta: "ДОКУМЕНТ: ДОГОВОР №TS-091"
+        },
+        {
+            title: "Внутренний аудит",
+            description: "Отчёт о проверке финансовых операций.",
+            body: "В ходе внутренней проверки обнаружены нарушения процедуры согласования платежей.\n\nНесколько операций проведены без подтверждения второго ответственного лица.\n\nДоступ к платёжной системе имели финансовый директор Игорь Васильев и бухгалтер Ольга Смирнова.\n\nЖурнал изменений за соответствующий период частично отсутствует.",
+            meta: "ДОКУМЕНТ: ОТЧЁТ ВНУТРЕННЕГО АУДИТА"
+        },
+        {
+            title: "Переписка сотрудников",
+            description: "Рабочие сообщения перед проведением переводов.",
+            body: "АНАСТАСИЯ: Документы готовы. Осталось проверить подписи.\n\nИГОРЬ: Проверь, чтобы версии совпадали.\n\nАНАСТАСИЯ: В старом архиве есть нужные сканы.\n\nИГОРЬ: Не обсуждай это в общем чате.\n\nСообщения отправлены за день до первого перевода.\n\nКонтекст переписки требует дополнительной проверки.",
+            meta: "ДОКУМЕНТ: ВЫГРУЗКА РАБОЧЕГО ЧАТА"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Игорь Васильев",
+            description: "Финансовый директор.",
+            body: "СЛЕДОВАТЕЛЬ: Кто согласовывал переводы?\n\nВАСИЛЬЕВ: Все операции проходили через бухгалтерию.\n\nСЛЕДОВАТЕЛЬ: Вы проверяли документы лично?\n\nВАСИЛЬЕВ: Я подписывал общие отчёты, но не каждое поручение.\n\nСЛЕДОВАТЕЛЬ: Почему сумма договоров такая высокая?\n\nВАСИЛЬЕВ: Это условия подрядчика. Я не занимался расчётами.\n\nСЛЕДОВАТЕЛЬ: Вы общались с Анастасией по поводу подписей?\n\nВАСИЛЬЕВ: Только по рабочим вопросам.\n\nПРИМЕЧАНИЕ: Васильев перекладывает ответственность на бухгалтерию.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ИГОРЬ ВАСИЛЬЕВ"
+        },
+        {
+            title: "Допрос: Ольга Смирнова",
+            description: "Бухгалтер организации.",
+            body: "СЛЕДОВАТЕЛЬ: Вы подписывали платёжные поручения?\n\nСМИРНОВА: Нет. Подпись на документах не моя.\n\nСЛЕДОВАТЕЛЬ: У кого был доступ к вашим документам?\n\nСМИРНОВА: У финансового директора и секретаря. Они могли просматривать архив.\n\nСЛЕДОВАТЕЛЬ: Вы замечали подозрительные операции?\n\nСМИРНОВА: Да, но мне сказали, что всё согласовано.\n\nСЛЕДОВАТЕЛЬ: Кто именно?\n\nСМИРНОВА: Игорь Васильев.\n\nПРИМЕЧАНИЕ: Смирнова отрицает подпись и указывает на доступ других сотрудников к архиву.",
+            meta: "ПОДОЗРЕВАЕМАЯ: ОЛЬГА СМИРНОВА"
+        },
+        {
+            title: "Допрос: Анастасия Волкова",
+            description: "Секретарь организации.",
+            body: "СЛЕДОВАТЕЛЬ: Почему на флешке найдены сканы подписей?\n\nВОЛКОВА: Я готовила документы для архива.\n\nСЛЕДОВАТЕЛЬ: Вы знали о переводах?\n\nВОЛКОВА: Нет, я только передавала документы.\n\nСЛЕДОВАТЕЛЬ: Почему вы заходили в финансовый отдел?\n\nВОЛКОВА: Игорь попросил принести бумаги.\n\nСЛЕДОВАТЕЛЬ: Вы копировали подпись Ольги?\n\nВОЛКОВА: Нет. Я не занималась платёжными поручениями.\n\nПРИМЕЧАНИЕ: Необходимо выяснить, кто попросил Анастасию подготовить сканы.",
+            meta: "ПОДОЗРЕВАЕМАЯ: АНАСТАСИЯ ВОЛКОВА"
+        },
+        {
+            title: "Допрос: Сергей Павлов",
+            description: "Представитель подрядчика.",
+            body: "СЛЕДОВАТЕЛЬ: Вы подтверждаете получение денег?\n\nПАВЛОВ: Да, компания получила оплату за услуги.\n\nСЛЕДОВАТЕЛЬ: Какие именно услуги были выполнены?\n\nПАВЛОВ: Обслуживание оборудования и консультации.\n\nСЛЕДОВАТЕЛЬ: Почему в договоре нет подробной сметы?\n\nПАВЛОВ: Документы готовила ваша организация.\n\nСЛЕДОВАТЕЛЬ: Вы лично встречались с Васильевым?\n\nПАВЛОВ: Один раз, обсуждали условия договора.\n\nПРИМЕЧАНИЕ: Павлов подтверждает получение денег, но не предоставляет подробностей о выполненных работах.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: СЕРГЕЙ ПАВЛОВ"
+        }
+    ]
+}
+};
+
+const suspectProfiles = {
+    1: [
+        { title: "Дмитрий Орлов", description: "42 года · Финансовый директор · Деловой партнёр Андрея Волкова." },
+        { title: "Елена Морозова", description: "35 лет · Личный помощник · Бывшая девушка погибшего." },
+        { title: "Максим Соколов", description: "29 лет · Системный администратор · Имел технический доступ к инфраструктуре компании." },
+        { title: "Алексей Громов", description: "38 лет · Бывший деловой партнёр · Сосед погибшего." }
+    ],
+    2: [
+        { title: "Антон Беляев", description: "31 год · Коллега Ивана · Работал с ним в одной организации." },
+        { title: "Олег Миронов", description: "46 лет · Руководитель организации · Был связан с финансовыми отчётами." },
+        { title: "Павел Денисов", description: "34 года · Друг детства Ивана · Сотрудник отдела логистики." },
+        { title: "Мария Крылова", description: "39 лет · Сестра пропавшего · Поддерживала с Иваном регулярное общение." }
+    ],
+    3: [
+        { title: "Игорь Васильев", description: "44 года · Финансовый менеджер · Имел доступ к финансовым операциям." },
+        { title: "Ольга Смирнова", description: "36 лет · Главный бухгалтер · Отрицает подписание спорного документа." },
+        { title: "Анастасия Волкова", description: "32 года · Юрист компании · Работала с договорами и документами." },
+        { title: "Сергей Павлов", description: "40 лет · Представитель подрядчика · Связан с компанией-получателем платежей." }
+    ]
+};
+const params = new URLSearchParams(window.location.search);
+const caseId = Number(params.get("id")) || 1;
+const currentCase = allCases[caseId] || allCases[1];
+const people = suspectProfiles[caseId] || [];
+const storageKey = `casefiles_connections_${caseId}`;
+let connections = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+document.getElementById("caseNumber").textContent = currentCase.number + " / EVIDENCE BOARD";
+document.getElementById("caseTitle").textContent = currentCase.title;
+document.title = `CASEFILES — Доска расследования: ${currentCase.title}`;
+document.getElementById("backLink").href = `investigation.html?id=${caseId}`;
+document.getElementById("backMaterials").href = `investigation.html?id=${caseId}`;
+document.getElementById("backVerdict").href = `verdict.html?id=${caseId}`;
+
+const materialSelect = document.getElementById("materialSelect");
+const suspectSelect = document.getElementById("suspectSelect");
+
+const materialGroups = [
+    ["evidence", "УЛИКИ", currentCase.evidence],
+    ["documents", "ДОКУМЕНТЫ", currentCase.documents],
+    ["interrogations", "ДОПРОСЫ", currentCase.interrogations]
+];
+materialGroups.forEach(([key, label, items]) => {
+    const group = document.createElement("optgroup");
+    group.label = label;
+    items.forEach((item, index) => {
+        const option = document.createElement("option");
+        option.value = `${key}_${index}`;
+        option.textContent = item.title;
+        group.appendChild(option);
+    });
+    materialSelect.appendChild(group);
+});
+people.forEach((person, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = person.title;
+    suspectSelect.appendChild(option);
+});
+
+function saveConnections() {
+    localStorage.setItem(storageKey, JSON.stringify(connections));
+    document.getElementById("saveStatus").textContent = "ИЗМЕНЕНИЯ СОХРАНЕНЫ";
+}
+function getMaterialById(id) {
+    const [group, index] = id.split("_");
+    return currentCase[group]?.[Number(index)];
+}
+function renderConnections() {
+    const container = document.getElementById("connections");
+    container.innerHTML = "";
+    document.getElementById("connectionCount").textContent =
+        `${connections.length} ${connections.length === 1 ? "СВЯЗЬ" : connections.length >= 2 && connections.length <= 4 ? "СВЯЗИ" : "СВЯЗЕЙ"}`;
+    if (!connections.length) {
+        container.innerHTML = '<div class="empty">На доске пока нет связей.<br>Выбери материал и подозреваемого справа, чтобы создать первую заметку.</div>';
+        return;
+    }
+    connections.forEach((connection, index) => {
+        const material = getMaterialById(connection.materialId);
+        const person = people[Number(connection.suspectIndex)];
+        if (!material || !person) return;
+        const card = document.createElement("article");
+        card.className = "connection";
+        const top = document.createElement("div");
+        top.className = "connection-top";
+        const tag = document.createElement("span");
+        tag.className = "connection-tag";
+        tag.textContent = connection.relation.toUpperCase();
+        const remove = document.createElement("button");
+        remove.className = "delete";
+        remove.type = "button";
+        remove.title = "Удалить связь";
+        remove.textContent = "×";
+        remove.addEventListener("click", () => {
+            connections.splice(index, 1);
+            saveConnections();
+            renderConnections();
+        });
+        top.append(tag, remove);
+        const flow = document.createElement("div");
+        flow.className = "connection-flow";
+        const left = document.createElement("div");
+        left.className = "node";
+        left.innerHTML = `<small>МАТЕРИАЛ</small><strong></strong>`;
+        left.querySelector("strong").textContent = material.title;
+        const arrow = document.createElement("div");
+        arrow.className = "arrow";
+        const relationLabel = document.createElement("span");
+        relationLabel.textContent = "СВЯЗЬ";
+        arrow.appendChild(relationLabel);
+        const right = document.createElement("div");
+        right.className = "node";
+        right.innerHTML = `<small>ПОДОЗРЕВАЕМЫЙ</small><strong></strong>`;
+        right.querySelector("strong").textContent = person.title;
+        flow.append(left, arrow, right);
+        card.append(top, flow);
+        if (connection.note) {
+            const note = document.createElement("p");
+            note.className = "connection-note";
+            note.textContent = connection.note;
+            card.appendChild(note);
+        }
+        container.appendChild(card);
+    });
+}
+document.getElementById("connectionForm").addEventListener("submit", event => {
+    event.preventDefault();
+    connections.push({
+        materialId: materialSelect.value,
+        suspectIndex: Number(suspectSelect.value),
+        relation: document.getElementById("relationSelect").value,
+        note: document.getElementById("connectionNote").value.trim(),
+        createdAt: new Date().toISOString()
+    });
+    saveConnections();
+    document.getElementById("connectionNote").value = "";
+    renderConnections();
+});
+const suspectLinks = document.getElementById("suspectLinks");
+people.forEach((person, index) => {
+    const link = document.createElement("a");
+    link.className = "quick-link";
+    link.href = `suspect.html?case=${caseId}&suspect=${index}`;
+    const name = document.createElement("span");
+    name.textContent = person.title;
+    const action = document.createElement("span");
+    action.textContent = "ДОСЬЕ ↗";
+    link.append(name, action);
+    suspectLinks.appendChild(link);
+});
+renderConnections();
+</script>
+</body>
+</html>

@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEFILES — Материалы дела</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0b0d;
+            color: #eeeeef;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .container {
+            width: min(1100px, 90%);
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+
+        header {
+            height: 75px;
+            border-bottom: 1px solid #27272b;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: #b52d3e;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            color: #aaa;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        /* MAIN */
+
+        main {
+            padding-top: 45px;
+            padding-bottom: 80px;
+        }
+
+        .breadcrumbs {
+            color: #777;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 45px;
+        }
+
+        .breadcrumbs a {
+            color: #b52d3e;
+        }
+
+        .section-label {
+            color: #b52d3e;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .case-heading {
+            margin-bottom: 35px;
+        }
+
+        .case-heading h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        .case-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .case-meta span {
+            background: #17171b;
+            border: 1px solid #303036;
+            padding: 9px 14px;
+            color: #bbb;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* DESCRIPTION */
+
+        .description {
+            background: #141417;
+            border: 1px solid #29292e;
+            border-left: 3px solid #a32635;
+            padding: 30px;
+            margin-bottom: 65px;
+        }
+
+        .description h2 {
+            font-size: 20px;
+            margin-bottom: 18px;
+        }
+
+        .description p {
+            color: #aaa;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        /* SUSPECTS */
+
+        .suspects-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .suspects-heading h2 {
+            font-size: 29px;
+        }
+
+        .suspects-count {
+            color: #888;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+        }
+
+        .suspects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .suspect-card {
+            background: #141417;
+            border: 1px solid #303036;
+            padding: 27px;
+            min-height: 210px;
+            transition: 0.25s;
+        }
+
+        .suspect-card:hover {
+            border-color: #a32635;
+            transform: translateY(-3px);
+        }
+
+        .suspect-number {
+            color: #a32635;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+        }
+
+        .suspect-card h3 {
+            font-size: 22px;
+            margin-bottom: 9px;
+        }
+
+        .suspect-role {
+            color: #bd4754;
+            font-size: 12px;
+            margin-bottom: 17px;
+        }
+
+        .suspect-description {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* START */
+
+        .start-section {
+            margin-top: 65px;
+            padding: 35px;
+            background: #171316;
+            border: 1px solid #54252d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .start-section h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .start-section p:last-child {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .start-button {
+            background: #a32635;
+            color: white;
+            border: none;
+            padding: 17px 23px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .start-button:hover {
+            background: #c33a4b;
+        }
+
+        /* ERROR */
+
+        .error {
+            padding: 70px 20px;
+            text-align: center;
+        }
+
+        .error h1 {
+            margin-bottom: 15px;
+        }
+
+        .error a {
+            display: inline-block;
+            margin-top: 25px;
+            color: #d04450;
+        }
+
+        /* FOOTER */
+
+        footer {
+            border-top: 1px solid #27272b;
+            padding: 25px 0;
+            color: #666;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+        }
+
+        @media (max-width: 650px) {
+            nav {
+                gap: 12px;
+            }
+
+            nav a {
+                font-size: 11px;
+            }
+
+            .suspects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .start-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .start-button {
+                width: 100%;
+            }
+
+            .suspects-heading {
+                align-items: flex-start;
+                gap: 10px;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">CASE<span>FILES</span></a>
+
+        <nav>
+            <a href="index.html">Главная</a>
+            <a href="index.html#cases">Архив дел</a>
+            <a href="index.html#about">О проекте</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container" id="main-content">
+
+    <div class="breadcrumbs">
+        <a href="index.html">Главная</a> / Материалы дела
+    </div>
+
+    <section class="case-heading">
+        <div class="section-label" id="case-number"></div>
+        <h1 id="case-title"></h1>
+
+        <div class="case-meta">
+            <span id="case-category"></span>
+            <span id="case-date"></span>
+            <span id="case-status"></span>
+        </div>
+    </section>
+
+    <section class="description">
+        <h2>Обстоятельства дела</h2>
+        <p id="case-description"></p>
+    </section>
+
+    <section>
+        <div class="suspects-heading">
+            <div>
+                <div class="section-label">СПИСОК ЛИЦ</div>
+                <h2>Подозреваемые</h2>
+            </div>
+
+            <div class="suspects-count" id="suspects-count"></div>
+        </div>
+
+        <div class="suspects-grid" id="suspects-list"></div>
+    </section>
+
+    <section class="start-section">
+        <div>
+            <div class="section-label">СЛЕДУЮЩИЙ ЭТАП</div>
+            <h2>Начните расследование</h2>
+            <p>Изучите улики, документы и показания подозреваемых.</p>
+        </div>
+
+        <button class="start-button" onclick="startInvestigation()">
+            НАЧАТЬ РАССЛЕДОВАНИЕ →
+        </button>
+    </section>
+
+</main>
+
+<footer>
+    <div class="container">
+        CASEFILES © 2026 — Архив нераскрытых дел
+    </div>
+</footer>
+
+<script>
+    const cases = {
+
+        1: {
+            number: "CASE №001",
+            title: "Последний звонок",
+            category: "Убийство",
+            date: "12.10.2026",
+            status: "Открыто",
+
+            description: "12 октября 2026 года в своей квартире был найден мёртвым Андрей Волков, владелец крупной IT-компании. По предварительным данным, смерть наступила поздно вечером. Незадолго до происшествия Андрей общался с несколькими людьми. В телефоне обнаружены удалённые сообщения, а записи с камер наблюдения содержат временные несоответствия. У каждого из четырёх подозреваемых был возможный мотив.",
+
+            suspects: [
+                {
+                    name: "Дмитрий Орлов",
+                    role: "Бизнес-партнёр",
+                    description: "Совладелец компании и давний деловой партнёр Андрея. В последнее время между ними возникли серьёзные разногласия из-за распределения прибыли. Андрей собирался исключить Дмитрия из бизнеса."
+                },
+                {
+                    name: "Елена Морозова",
+                    role: "Бывшая девушка",
+                    description: "Состояла в отношениях с Андреем около трёх лет. Они расстались после серьёзного конфликта. В день происшествия Елена несколько раз пыталась дозвониться до него."
+                },
+                {
+                    name: "Максим Соколов",
+                    role: "Системный администратор",
+                    description: "Работал в компании Андрея и имел доступ к корпоративным серверам и внутренним системам. Незадолго до убийства удалённо подключался к рабочему компьютеру потерпевшего."
+                },
+                {
+                    name: "Алексей Громов",
+                    role: "Сосед",
+                    description: "Жил этажом выше. По его словам, вечером он услышал громкий звук из квартиры Андрея, но не придал этому значения. Камеры подъезда зафиксировали его перемещения в необычное время."
+                }
+            ]
+        },
+
+        2: {
+            number: "CASE №002",
+            title: "Исчезновение",
+            category: "Пропажа человека",
+            date: "03.11.2026",
+            status: "Открыто",
+
+            description: "3 ноября 2026 года сотрудник частной организации Иван Крылов покинул офис после окончания рабочего дня и бесследно исчез. Его автомобиль остался на парковке, а телефон перестал выходить на связь около 21:40. Последнее сообщение Иван отправил неизвестному контакту. Следствие обнаружило противоречия в показаниях коллег и близких пропавшего. Необходимо восстановить его маршрут и выяснить, кто видел Ивана последним.",
+
+            suspects: [
+                {
+                    name: "Антон Беляев",
+                    role: "Коллега",
+                    description: "Работал с Иваном над одним проектом. За несколько дней до исчезновения между ними произошёл конфликт из-за результатов совместной работы. Антон утверждает, что после окончания рабочего дня не видел Ивана."
+                },
+                {
+                    name: "Олег Миронов",
+                    role: "Руководитель",
+                    description: "Непосредственный начальник Ивана. Последним из сотрудников разговаривал с ним в офисе. Заявляет, что беседа касалась исключительно рабочих вопросов, однако содержание разговора не подтверждено."
+                },
+                {
+                    name: "Павел Денисов",
+                    role: "Друг детства",
+                    description: "Дружил с Иваном с подросткового возраста. Утверждает, что давно не общался с пропавшим. Однако в истории звонков обнаружены продолжительные разговоры между ними накануне исчезновения."
+                },
+                {
+                    name: "Мария Крылова",
+                    role: "Сестра",
+                    description: "Близкий родственник Ивана. Получила от него последнее сообщение вечером в день исчезновения. Содержание сообщения показалось ей странным, но сначала она не обратилась в полицию."
+                }
+            ]
+        },
+
+        3: {
+            number: "CASE №003",
+            title: "Чужая подпись",
+            category: "Финансовое преступление",
+            date: "07.11.2026",
+            status: "Открыто",
+
+            description: "В частной организации обнаружена пропажа крупной суммы денег. Финансовые документы подтверждают проведение нескольких переводов, однако сотрудник, от имени которого были оформлены операции, отрицает свою причастность. На документах стоит его подпись, но предварительная проверка выявила признаки возможной подделки. Доступ к финансовой информации имели несколько сотрудников и один внешний подрядчик.",
+
+            suspects: [
+                {
+                    name: "Игорь Васильев",
+                    role: "Финансовый директор",
+                    description: "Контролировал финансовые операции организации и имел доступ к банковским документам. Именно он утверждал большинство крупных переводов. После обнаружения пропажи денег отказался предоставить часть внутренней переписки."
+                },
+                {
+                    name: "Ольга Смирнова",
+                    role: "Бухгалтер",
+                    description: "Занималась подготовкой платёжных поручений и отчётности. Работала с документами, на которых обнаружена спорная подпись. Утверждает, что оформляла операции исключительно по распоряжению руководства."
+                },
+                {
+                    name: "Анастасия Волкова",
+                    role: "Секретарь",
+                    description: "Имела доступ к архиву документов и могла получать оригиналы подписей сотрудников. В журнале посещений обнаружено, что она заходила в архив поздно вечером перед обнаружением пропажи."
+                },
+                {
+                    name: "Сергей Павлов",
+                    role: "Внешний подрядчик",
+                    description: "Представитель компании, которая получала часть спорных переводов. После финансовых операций условия сотрудничества неожиданно изменились. Утверждает, что не знал о возможных нарушениях."
+                }
+            ]
+        }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const caseId = params.get("id") || "1";
+    const currentCase = cases[caseId];
+
+    function startInvestigation() {
+        window.location.href = "investigation.html?id=" + caseId;
+    }
+
+    function renderCase() {
+        if (!currentCase) {
+            document.getElementById("main-content").innerHTML = `
+                <div class="error">
+                    <h1>Дело не найдено</h1>
+                    <p>Такого дела нет в архиве.</p>
+                    <a href="index.html">← Вернуться на главную</a>
+                </div>
+            `;
+            return;
+        }
+
+        document.title = "CASEFILES — " + currentCase.title;
+
+        document.getElementById("case-number").textContent = currentCase.number;
+        document.getElementById("case-title").textContent = currentCase.title;
+        document.getElementById("case-category").textContent = currentCase.category;
+        document.getElementById("case-date").textContent = currentCase.date;
+        document.getElementById("case-status").textContent = currentCase.status;
+        document.getElementById("case-description").textContent = currentCase.description;
+
+        document.getElementById("suspects-count").textContent =
+            "04 ФИГУРАНТА";
+
+        const list = document.getElementById("suspects-list");
+
+        currentCase.suspects.forEach((suspect, index) => {
+            const card = document.createElement("article");
+            card.className = "suspect-card";
+
+            const number = document.createElement("div");
+            number.className = "suspect-number";
+            number.textContent = "ПОДОЗРЕВАЕМЫЙ №0" + (index + 1);
+
+            const name = document.createElement("h3");
+            name.textContent = suspect.name;
+
+            const role = document.createElement("div");
+            role.className = "suspect-role";
+            role.textContent = suspect.role;
+
+            const description = document.createElement("p");
+            description.className = "suspect-description";
+            description.textContent = suspect.description;
+
+            card.append(number, name, role, description);
+            list.appendChild(card);
+        });
+    }
+
+    renderCase();
+</script>
+
+</body>
+</html>

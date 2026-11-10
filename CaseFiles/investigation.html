@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEFILES — Расследование</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg: #0b0b0d;
+    --surface: #141417;
+    --surface2: #1b1b20;
+    --border: #2a2a30;
+    --text: #eeeeef;
+    --muted: #92929b;
+    --red: #a32635;
+    --red-light: #d04450;
+    --green: #6eaa83;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+
+header {
+    height: 76px;
+    padding: 0 7%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: #0d0d0f;
+}
+
+.logo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 3px;
+}
+
+.logo span { color: var(--red-light); }
+
+.header-label {
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.container {
+    width: min(1100px, 86%);
+    margin: 0 auto;
+    padding: 48px 0 80px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 35px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    transition: .2s;
+}
+
+.back-link:hover { color: var(--red-light); }
+
+.eyebrow {
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 14px;
+}
+
+h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin: 0 0 14px;
+    letter-spacing: -1.5px;
+}
+
+.case-description {
+    max-width: 720px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+.progress-panel {
+    margin: 35px 0 40px;
+    padding: 23px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+}
+
+.progress-number { color: var(--red-light); }
+
+.progress-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.reset-button {
+    padding: 9px 12px;
+    border: 1px solid #71313a;
+    background: #211519;
+    color: #e58b93;
+    cursor: pointer;
+    font: 10px 'IBM Plex Mono', monospace;
+    letter-spacing: .7px;
+    transition: .2s;
+}
+
+.reset-button:hover {
+    background: #55202a;
+    border-color: var(--red-light);
+    color: #fff;
+}
+
+.progress-track {
+    height: 5px;
+    background: #303036;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--red);
+    transition: width .3s;
+}
+
+.investigation-layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 35px;
+}
+
+.tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 12px;
+    background: #111114;
+    border: 1px solid var(--border);
+    border-left: 3px solid #45454d;
+    position: sticky;
+    top: 22px;
+}
+
+.tab {
+    width: 100%;
+    min-height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
+    background: #1a1a20;
+    color: #c1c1ca;
+    padding: 13px 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .25px;
+    transition: .2s;
+}
+
+.tab::before {
+    content: "›";
+    color: #888892;
+    font-size: 19px;
+    line-height: 1;
+}
+
+.tab:hover {
+    color: #fff;
+    background: #25252c;
+    border-color: #41414a;
+}
+
+.tab.active {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(163,38,53,.32), rgba(163,38,53,.09));
+    border-color: rgba(208,68,80,.4);
+    border-left-color: var(--red-light);
+    box-shadow: inset 0 0 18px rgba(163,38,53,.09);
+}
+
+.tab.active::before { color: var(--red-light); }
+.tab span { color: inherit; opacity: .8; }
+.content-area { min-width: 0; }
+
+.materials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.material-card {
+    min-height: 180px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: .2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.material-card:hover {
+    border-color: var(--red);
+    transform: translateY(-2px);
+}
+
+.material-card.read { border-left: 3px solid var(--green); }
+
+.material-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 17px;
+}
+
+.material-number {
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+}
+
+.read-label {
+    color: var(--green);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+}
+
+.material-card h3 {
+    font-size: 17px;
+    margin: 0 0 10px;
+}
+
+.material-card p {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.open-label {
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.notes-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 25px;
+}
+
+.notes-section h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+}
+
+.notes-section p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+textarea {
+    display: block;
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    margin-top: 20px;
+    padding: 17px;
+    background: #0d0d10;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font: 14px/1.7 'Inter', sans-serif;
+    outline: none;
+}
+
+textarea:focus { border-color: var(--red); }
+
+.save-status {
+    color: var(--green);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    margin-top: 12px;
+}
+
+.empty-state {
+    color: var(--muted);
+    padding: 30px 0;
+    font-size: 14px;
+}
+
+
+/* Интерактивные допросы */
+.interrogation-scene { margin-top: 8px; }
+.interrogation-intro { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 18px; }
+.dialogue-history { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
+.dialogue-line { max-width: 92%; padding: 13px 15px; border: 1px solid var(--border); background: #101014; font-size: 13px; line-height: 1.75; white-space: pre-line; }
+.dialogue-line.investigator { align-self: flex-end; border-right: 3px solid var(--red-light); }
+.dialogue-line.suspect { align-self: flex-start; border-left: 3px solid #777783; background: #1b1b20; }
+.dialogue-speaker { display: block; margin-bottom: 5px; color: var(--red-light); font: 10px 'IBM Plex Mono', monospace; letter-spacing: 1px; }
+.dialogue-line.suspect .dialogue-speaker { color: #b5b5c0; }
+.questions-title { margin: 22px 0 10px; color: var(--muted); font: 11px 'IBM Plex Mono', monospace; letter-spacing: 1px; }
+.question-list { display: grid; gap: 8px; }
+.question-button { width: 100%; padding: 13px 14px; text-align: left; color: #dddde2; background: #202026; border: 1px solid #383840; cursor: pointer; font: 12px/1.6 'Inter', sans-serif; transition: .2s; }
+.question-button:hover { border-color: var(--red-light); background: #2a1b20; }
+.question-button:disabled { cursor: default; opacity: .55; border-color: #35483b; }
+.question-button:disabled::after { content: '  ✓'; color: var(--green); }
+.interrogation-finish { margin-top: 16px; padding: 13px; border: 1px solid #35483b; color: #a9d4b7; font-size: 12px; line-height: 1.7; }
+.interrogation-note { margin-top: 18px; padding: 14px; background: #211c1e; border-left: 3px solid var(--red); color: #c8bfc1; font-size: 12px; line-height: 1.7; }
+@media (max-width: 650px) { .dialogue-line { max-width: 100%; } }
+
+/* Окно материала */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0,0,0,.82);
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show { display: flex; }
+
+.modal-content {
+    width: min(650px, 100%);
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #151518;
+    border: 1px solid #393940;
+    padding: 30px;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 17px;
+    right: 20px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 26px;
+    cursor: pointer;
+}
+
+.close-modal:hover { color: white; }
+
+.modal-category {
+    color: var(--red-light);
+    font: 11px 'IBM Plex Mono', monospace;
+    letter-spacing: 2px;
+    margin-bottom: 18px;
+}
+
+.modal-content h2 {
+    font-size: 25px;
+    margin: 0 35px 20px 0;
+}
+
+.modal-body {
+    color: #c3c3c9;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-line;
+}
+
+.modal-meta {
+    margin-top: 25px;
+    padding-top: 17px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font: 11px 'IBM Plex Mono', monospace;
+}
+
+.mark-button {
+    margin-top: 25px;
+    padding: 14px 20px;
+    background: var(--red);
+    border: 1px solid var(--red);
+    color: white;
+    font: 11px 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.mark-button:hover { background: var(--red-light); }
+.mark-button:disabled {
+    background: #25372c;
+    border-color: #25372c;
+    color: #a9d4b7;
+    cursor: default;
+}
+
+footer {
+    padding: 25px 7%;
+    border-top: 1px solid var(--border);
+    color: #66666e;
+    font: 10px 'IBM Plex Mono', monospace;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.finish-panel {
+    margin-top: 35px;
+    padding: 25px;
+    background: linear-gradient(135deg, #171316, #141417 65%);
+    border: 1px solid #48232a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+}
+
+.finish-text h2 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.finish-text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.finish-button {
+    flex-shrink: 0;
+    padding: 15px 20px;
+    border: 1px solid var(--red-light);
+    background: var(--red);
+    color: white;
+    cursor: pointer;
+    font: 600 11px 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    transition: .2s;
+}
+
+.finish-button:hover {
+    background: var(--red-light);
+    transform: translateY(-2px);
+}
+
+.finish-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.board-button {
+    padding: 15px 20px;
+    border: 1px solid #55515a;
+    background: #202026;
+    color: #eeeeef;
+    cursor: pointer;
+    font: 600 11px 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    transition: .2s;
+}
+
+.board-button:hover {
+    border-color: var(--red-light);
+    background: #2a1b20;
+}
+
+@media (max-width: 950px) and (min-width: 651px) {
+    .investigation-layout { grid-template-columns: 195px minmax(0, 1fr); gap: 18px; }
+    .tab { padding: 12px 9px; font-size: 10px; }
+}
+
+@media (max-width: 650px) {
+    .finish-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    .board-button { width: 100%; }
+}
+
+@media (max-width: 650px) {
+    .finish-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .finish-button { width: 100%; }
+}
+
+@media (max-width: 650px) {
+    header { padding: 0 5%; }
+    .header-label { display: none; }
+    .container { width: 90%; padding-top: 30px; }
+    .materials-grid { grid-template-columns: 1fr; }
+    .progress-panel { padding: 17px; }
+    .progress-top { align-items: flex-start; flex-direction: column; }
+    .progress-controls { justify-content: space-between; width: 100%; }
+    .investigation-layout {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .tabs {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 7px;
+        padding: 8px;
+        border-left: 1px solid var(--border);
+        border-top: 3px solid #45454d;
+    }
+    .tab {
+        width: auto;
+        min-width: max-content;
+        min-height: 43px;
+        padding: 10px 12px;
+        font-size: 10px;
+        border-left: 1px solid transparent;
+        border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+        border-left-color: transparent;
+        border-bottom-color: var(--red-light);
+    }
+    .modal-content { padding: 23px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <a href="index.html" class="logo">CASE<span>FILES</span></a>
+    <div class="header-label">СИСТЕМА РАССЛЕДОВАНИЙ / 2026</div>
+</header>
+
+<main class="container">
+
+    <a href="case.html" class="back-link" id="backLink">← НАЗАД К МАТЕРИАЛАМ ДЕЛА</a>
+
+    <div class="eyebrow" id="caseNumber">CASE №001</div>
+    <h1 id="caseTitle">Загрузка...</h1>
+    <p class="case-description" id="caseDescription"></p>
+
+    <section class="progress-panel">
+        <div class="progress-top">
+            <span>ХОД РАССЛЕДОВАНИЯ</span>
+            <div class="progress-controls">
+                <span class="progress-number" id="progressText">0 / 12 ИЗУЧЕНО</span>
+                <button class="reset-button" id="resetProgress" type="button">СБРОСИТЬ ВСЁ</button>
+            </div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </section>
+
+    <div class="investigation-layout">
+        <nav class="tabs" aria-label="Разделы расследования">
+            <button class="tab active" data-tab="evidence">УЛИКИ <span>(4)</span></button>
+            <button class="tab" data-tab="documents">ДОКУМЕНТЫ <span>(4)</span></button>
+            <button class="tab" data-tab="interrogations">ДОПРОСЫ <span>(4)</span></button>
+            <button class="tab" data-tab="suspects">ПОДОЗРЕВАЕМЫЕ <span>(4)</span></button>
+            <button class="tab" data-tab="notes">ЗАМЕТКИ</button>
+        </nav>
+
+        <div class="content-area">
+            <section id="materials" class="materials-grid"></section>
+
+            <section id="notesSection" class="notes-section" style="display:none;">
+                <h2>Заметки следователя</h2>
+                <p>Записывай сюда подозрения, несоответствия в показаниях и собственные версии. Заметки сохраняются автоматически отдельно для каждого дела.</p>
+                <textarea id="notes" placeholder="Начни записывать свои наблюдения..."></textarea>
+                <div class="save-status" id="saveStatus">ЗАМЕТКИ СОХРАНЕНЫ</div>
+            </section>
+        </div>
+    </div>
+
+    <section class="finish-panel">
+        <div class="finish-text">
+            <h2>Материалы изучены. Что дальше?</h2>
+            <p>Сопоставь материалы на доске расследования, зафиксируй связи между уликами и подозреваемыми, а затем переходи к финальной версии расследования.</p>
+        </div>
+        <div class="finish-actions">
+            <button class="board-button" id="openBoard">ОТКРЫТЬ ДОСКУ РАССЛЕДОВАНИЯ ↗</button>
+            <button class="finish-button" id="finishInvestigation">ЗАВЕРШИТЬ РАССЛЕДОВАНИЕ →</button>
+        </div>
+    </section>
+
+</main>
+
+<div class="modal" id="materialModal">
+    <div class="modal-content">
+        <button class="close-modal" id="closeModal" aria-label="Закрыть">&times;</button>
+        <div class="modal-category" id="modalCategory"></div>
+        <h2 id="modalTitle"></h2>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-meta" id="modalMeta"></div>
+        <button class="mark-button" id="markButton">ОТМЕТИТЬ КАК ИЗУЧЕННОЕ</button>
+    </div>
+</div>
+
+<footer>CASEFILES © 2026 — ДОСТУП К МАТЕРИАЛАМ РАССЛЕДОВАНИЯ</footer>
+
+<script>
+const allCases = {
+
+1: {
+    number: "CASE №001",
+    title: "Последний звонок",
+    description: "Владелец IT-компании Андрей Волков найден мёртвым в собственной квартире. Следствие рассматривает четыре версии. Изучите цифровые следы, документы и показания подозреваемых, чтобы восстановить события последнего вечера.",
+
+    evidence: [
+        {
+            title: "Телефон жертвы",
+            description: "Последняя активность устройства Андрея Волкова.",
+            body: "Телефон Андрея найден на кухонном столе. Последнее исходящее сообщение отправлено в 22:41.\n\nТекст сообщения: «Нам нужно поговорить. Я всё узнал».\n\nПолучатель не сохранён в контактах. Сообщение было прочитано в 22:46, но ответа не последовало.\n\nВ 23:08 устройство перестало выходить в сеть.",
+            meta: "ОБЪЕКТ: МОБИЛЬНЫЙ ТЕЛЕФОН / ВРЕМЯ: 22:41"
+        },
+        {
+            title: "Следы на ноутбуке",
+            description: "Последние действия на рабочем компьютере.",
+            body: "На ноутбуке Волкова обнаружена открытая переписка с корпоративного аккаунта.\n\nЗа час до смерти кто-то пытался удалить несколько сообщений. История входов показывает подключение к системе в 22:17.\n\nУстройство было разблокировано с использованием учётной записи администратора.\n\nВ журнале также обнаружено подключение внешнего накопителя.",
+            meta: "ОБЪЕКТ: НОУТБУК / ЦИФРОВАЯ ЭКСПЕРТИЗА"
+        },
+        {
+            title: "Камера подъезда",
+            description: "Запись видеонаблюдения за вечер происшествия.",
+            body: "Камера подъезда зафиксировала четырёх посетителей в день происшествия.\n\n18:32 — Дмитрий Орлов покинул здание.\n19:14 — Елена Морозова вошла в подъезд.\n20:03 — неизвестный человек в капюшоне поднялся на этаж Волкова.\n21:26 — Максим Соколов вышел из здания.\n\nЛицо неизвестного посетителя не удалось распознать.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №04"
+        },
+        {
+            title: "Отпечатки на стакане",
+            description: "Результаты криминалистической экспертизы.",
+            body: "На стакане, найденном рядом с рабочим столом, обнаружены два набора отпечатков.\n\nПервый принадлежит Андрею Волкову.\n\nВторой частично совпадает с отпечатками Дмитрия Орлова. Эксперт отмечает, что стакан мог использоваться несколькими людьми в разное время.\n\nНа поверхности также обнаружены следы чистящего средства.",
+            meta: "ОБЪЕКТ: СТАКАН / ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Отчёт о вскрытии",
+            description: "Предварительное заключение судебно-медицинской экспертизы.",
+            body: "Пострадавший: Андрей Волков.\n\nПредполагаемое время смерти: с 22:00 до 23:30.\n\nНа теле обнаружены признаки насильственной смерти. Следов взлома на входной двери квартиры не выявлено.\n\nВремя смерти не позволяет однозначно определить, кто из посетителей находился в квартире последним.\n\nОкончательное заключение требует дополнительных исследований.",
+            meta: "ДОКУМЕНТ: МЕДИЦИНСКОЕ ЗАКЛЮЧЕНИЕ"
+        },
+        {
+            title: "Корпоративный контракт",
+            description: "Документ о распределении долей в IT-компании.",
+            body: "Согласно договору, Андрей Волков владел 60% компании, Дмитрий Орлов — 40%.\n\nЗа неделю до происшествия Волков инициировал пересмотр условий партнёрства.\n\nВ приложении к договору обнаружены исправления, сделанные от руки. Подпись на одной из страниц вызывает сомнения у эксперта.\n\nВозможный мотив: финансовый конфликт между партнёрами.",
+            meta: "ДОКУМЕНТ: ДОГОВОР №IT-204"
+        },
+        {
+            title: "Журнал системного доступа",
+            description: "Список входов сотрудников в корпоративную сеть.",
+            body: "В журнале зафиксированы следующие события:\n\n21:52 — вход под учётной записью администратора.\n22:17 — удалённое подключение к серверу.\n22:23 — изменение прав доступа к архиву.\n22:39 — попытка удаления журнала событий.\n\nУчётная запись принадлежит системному администратору Максиму Соколову.\n\nСамо по себе использование учётной записи не доказывает, что вход выполнял её владелец.",
+            meta: "ДОКУМЕНТ: СИСТЕМНЫЙ ЖУРНАЛ"
+        },
+        {
+            title: "Переписка с Еленой",
+            description: "Сообщения между Волковым и его бывшей девушкой.",
+            body: "Из переписки следует, что отношения Андрея и Елены закончились конфликтом.\n\nПоследнее сообщение от Елены: «Ты не можешь просто так вычеркнуть меня из своей жизни».\n\nАндрей ответил: «Я больше не хочу возвращаться к этому».\n\nВ день происшествия Елена звонила ему трижды. Два звонка остались без ответа.",
+            meta: "ДОКУМЕНТ: ВЫГРУЗКА ПЕРЕПИСКИ"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Дмитрий Орлов",
+            description: "Бизнес-партнёр погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз видели Андрея?\n\nОРЛОВ: В тот день, около шести вечера. Мы обсуждали дела компании.\n\nСЛЕДОВАТЕЛЬ: О чём был спор?\n\nОРЛОВ: О деньгах. Андрей хотел изменить условия нашего соглашения. Но это обычные рабочие разногласия.\n\nСЛЕДОВАТЕЛЬ: Вы возвращались в квартиру вечером?\n\nОРЛОВ: Нет. После встречи я сразу поехал домой.\n\nСЛЕДОВАТЕЛЬ: Почему ваши отпечатки нашли на стакане?\n\nОРЛОВ: Я бывал у Андрея много раз. Не вижу в этом ничего странного.\n\nПРИМЕЧАНИЕ: Орлов подтверждает финансовый конфликт, но отрицает возвращение в квартиру.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ДМИТРИЙ ОРЛОВ"
+        },
+        {
+            title: "Допрос: Елена Морозова",
+            description: "Бывшая девушка погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Зачем вы приходили к Андрею?\n\nМОРОЗОВА: Хотела забрать свои вещи. Он давно обещал их вернуть.\n\nСЛЕДОВАТЕЛЬ: Вы ссорились?\n\nМОРОЗОВА: Да. Он сказал, что у него появилась другая жизнь и мне не стоит вмешиваться.\n\nСЛЕДОВАТЕЛЬ: Вы были в квартире после девяти вечера?\n\nМОРОЗОВА: Нет. Я ушла примерно в восемь.\n\nСЛЕДОВАТЕЛЬ: Почему продолжали ему звонить?\n\nМОРОЗОВА: Я забыла спросить про одну вещь. Он не отвечал.\n\nПРИМЕЧАНИЕ: Время ухода требует проверки по дополнительным записям.",
+            meta: "ПОДОЗРЕВАЕМАЯ: ЕЛЕНА МОРОЗОВА"
+        },
+        {
+            title: "Допрос: Максим Соколов",
+            description: "Системный администратор компании.",
+            body: "СЛЕДОВАТЕЛЬ: Почему ваша учётная запись использовалась ночью?\n\nСОКОЛОВ: Я иногда подключаюсь к серверу удалённо. Это часть моей работы.\n\nСЛЕДОВАТЕЛЬ: Вы удаляли сообщения Волкова?\n\nСОКОЛОВ: Нет. Я не имею отношения к его личной переписке.\n\nСЛЕДОВАТЕЛЬ: Вы были в его квартире?\n\nСОКОЛОВ: Да, раньше. Но в тот вечер я ушёл с работы и домой не заходил.\n\nСЛЕДОВАТЕЛЬ: Кто ещё мог использовать вашу учётную запись?\n\nСОКОЛОВ: Пароль был доступен нескольким сотрудникам для экстренного доступа.\n\nПРИМЕЧАНИЕ: Необходимо установить, с какого устройства выполнялись подключения.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: МАКСИМ СОКОЛОВ"
+        },
+        {
+            title: "Допрос: Алексей Громов",
+            description: "Сосед погибшего.",
+            body: "СЛЕДОВАТЕЛЬ: Вы слышали что-нибудь подозрительное?\n\nГРОМОВ: Около десяти вечера слышал громкий разговор. Мужской голос, потом что-то упало.\n\nСЛЕДОВАТЕЛЬ: Вы видели, кто находился в квартире?\n\nГРОМОВ: Нет. Дверь была закрыта.\n\nСЛЕДОВАТЕЛЬ: Вы знали Волкова лично?\n\nГРОМОВ: Только здоровались в подъезде.\n\nСЛЕДОВАТЕЛЬ: Почему не сообщили о шуме раньше?\n\nГРОМОВ: Сначала подумал, что обычная ссора.\n\nПРИМЕЧАНИЕ: Показания соседа могут помочь уточнить время происшествия.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: АЛЕКСЕЙ ГРОМОВ"
+        }
+    ]
+},
+
+2: {
+    number: "CASE №002",
+    title: "Исчезновение",
+    description: "Сотрудник частной организации Иван Крылов исчез после окончания рабочего дня. Его автомобиль найден неподалёку от офиса, телефон отключён. Следствие изучает маршрут, записи камер и отношения пропавшего с близкими.",
+
+    evidence: [
+        {
+            title: "Оставленный автомобиль",
+            description: "Машина Ивана обнаружена возле старого склада.",
+            body: "Автомобиль Ивана Крылова обнаружен в 06:40 утра на парковке возле заброшенного склада.\n\nДвери были закрыты, следов взлома нет. Ключи находились в салоне.\n\nНа пассажирском сиденье обнаружен конверт без адресата. Внутри — пустой лист бумаги.\n\nСледов борьбы внутри автомобиля не обнаружено.",
+            meta: "ОБЪЕКТ: АВТОМОБИЛЬ / МЕСТО: СТАРЫЙ СКЛАД"
+        },
+        {
+            title: "Последний сигнал телефона",
+            description: "Данные о последнем подключении мобильного устройства.",
+            body: "Телефон Ивана последний раз подключался к базовой станции в 21:18.\n\nСигнал зафиксирован в районе старого промышленного квартала.\n\nВ 21:23 устройство перестало отвечать на запросы сети.\n\nЗа двадцать минут до этого телефон находился возле офисного здания.",
+            meta: "ОБЪЕКТ: МОБИЛЬНОЕ УСТРОЙСТВО / 21:18"
+        },
+        {
+            title: "Камера у офиса",
+            description: "Запись с наружной камеры наблюдения.",
+            body: "Запись показывает, что Иван покинул здание в 19:06.\n\nЧерез две минуты к нему подошёл человек в тёмной куртке. Они разговаривали около трёх минут.\n\nПосле разговора Иван направился в сторону парковки.\n\nЛицо второго человека частично скрыто капюшоном.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №02"
+        },
+        {
+            title: "Блокнот Ивана",
+            description: "Личные записи, найденные в рабочем столе.",
+            body: "На последней странице блокнота обнаружена запись:\n\n«Они думают, что я ничего не знаю. Нужно поговорить с О. до пятницы».\n\nНиже записаны три номера телефонов. Один из них принадлежит руководителю организации Олегу Миронову.\n\nОстальные номера пока не установлены.",
+            meta: "ОБЪЕКТ: ЛИЧНЫЙ БЛОКНОТ / ПОСЛЕДНЯЯ СТРАНИЦА"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Табель рабочего времени",
+            description: "Официальные сведения о последнем рабочем дне.",
+            body: "Согласно табелю, Иван Крылов завершил работу в 18:00.\n\nОднако пропускная система зафиксировала его выход из здания в 19:06.\n\nВ период с 18:00 до 19:00 его пропуск использовался для входа в архивное помещение.\n\nКто именно воспользовался пропуском, установить пока не удалось.",
+            meta: "ДОКУМЕНТ: ТАБЕЛЬ №118"
+        },
+        {
+            title: "Отчёт о финансовых операциях",
+            description: "Подозрительные переводы внутри организации.",
+            body: "За последний месяц со счёта организации было выполнено несколько переводов на неизвестные счета.\n\nОбщая сумма операций превышает внутренний лимит согласования.\n\nИван Крылов имел доступ к отчётам и мог обнаружить несоответствия.\n\nВ документе отсутствует подпись ответственного сотрудника.",
+            meta: "ДОКУМЕНТ: ФИНАНСОВЫЙ ОТЧЁТ"
+        },
+        {
+            title: "Переписка с руководителем",
+            description: "Сообщения между Иваном и Олегом Мироновым.",
+            body: "ИВАН: Нам нужно обсудить переводы. Я нашёл расхождения.\n\nОЛЕГ: Не стоит делать поспешных выводов.\n\nИВАН: Я уже проверил документы. Объяснение не сходится.\n\nОЛЕГ: Приходи завтра, поговорим лично.\n\nПоследнее сообщение было отправлено в 18:52. Ответа на него нет.",
+            meta: "ДОКУМЕНТ: КОРПОРАТИВНАЯ ПЕРЕПИСКА"
+        },
+        {
+            title: "Список посещений здания",
+            description: "Информация о посетителях в день исчезновения.",
+            body: "В день исчезновения в здании зарегистрированы следующие посетители:\n\n17:40 — Антон Беляев.\n18:12 — Павел Денисов.\n18:47 — неизвестный посетитель.\n19:03 — Олег Миронов.\n\nЗапись о посещении Марии Крыловой отсутствует.\n\nДанные требуют сопоставления с видеозаписями.",
+            meta: "ДОКУМЕНТ: ЖУРНАЛ ПОСЕТИТЕЛЕЙ"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Антон Беляев",
+            description: "Коллега пропавшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз видели Ивана?\n\nБЕЛЯЕВ: В офисе, примерно в половине шестого.\n\nСЛЕДОВАТЕЛЬ: Вы ссорились?\n\nБЕЛЯЕВ: Нет. Он был напряжённым, но мы нормально общались.\n\nСЛЕДОВАТЕЛЬ: Почему вы приходили к нему в тот день?\n\nБЕЛЯЕВ: Хотел обсудить рабочую задачу.\n\nСЛЕДОВАТЕЛЬ: Вы знали о финансовых отчётах?\n\nБЕЛЯЕВ: Только то, что Иван занимался проверкой документов.\n\nПРИМЕЧАНИЕ: Беляев подтверждает встречу, но не объясняет, о чём именно говорил с Иваном.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: АНТОН БЕЛЯЕВ"
+        },
+        {
+            title: "Допрос: Олег Миронов",
+            description: "Руководитель организации.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз разговаривали с Иваном?\n\nМИРОНОВ: В день его исчезновения. Он хотел обсудить отчёты.\n\nСЛЕДОВАТЕЛЬ: Какие именно отчёты?\n\nМИРОНОВ: Обычные финансовые документы.\n\nСЛЕДОВАТЕЛЬ: Вы встречались с ним после работы?\n\nМИРОНОВ: Нет. Я задержался в офисе, но Ивана уже не было.\n\nСЛЕДОВАТЕЛЬ: Почему он написал, что хочет поговорить с вами до пятницы?\n\nМИРОНОВ: Не знаю, возможно, речь шла о работе.\n\nПРИМЕЧАНИЕ: Руководитель подтверждает конфликт вокруг документов, но отрицает личную встречу.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ОЛЕГ МИРОНОВ"
+        },
+        {
+            title: "Допрос: Павел Денисов",
+            description: "Друг детства Ивана.",
+            body: "СЛЕДОВАТЕЛЬ: Зачем вы приходили в офис?\n\nДЕНИСОВ: Иван попросил меня заехать. Сказал, что ему нужна помощь.\n\nСЛЕДОВАТЕЛЬ: О чём он хотел поговорить?\n\nДЕНИСОВ: О какой-то проблеме на работе. Подробностей не рассказал.\n\nСЛЕДОВАТЕЛЬ: Вы видели его после семи вечера?\n\nДЕНИСОВ: Нет. Я ушёл раньше.\n\nСЛЕДОВАТЕЛЬ: Он выглядел испуганным?\n\nДЕНИСОВ: Скорее обеспокоенным. Постоянно смотрел на телефон.\n\nПРИМЕЧАНИЕ: Денисов может знать о причинах беспокойства Ивана.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ПАВЕЛ ДЕНИСОВ"
+        },
+        {
+            title: "Допрос: Мария Крылова",
+            description: "Сестра пропавшего.",
+            body: "СЛЕДОВАТЕЛЬ: Когда вы последний раз общались с братом?\n\nМАРИЯ: В тот день утром. Он сказал, что вечером задержится.\n\nСЛЕДОВАТЕЛЬ: Он рассказывал о проблемах?\n\nМАРИЯ: Да, говорил, что обнаружил что-то странное в документах.\n\nСЛЕДОВАТЕЛЬ: Он называл имена?\n\nМАРИЯ: Нет. Сказал, что пока не может никому доверять.\n\nСЛЕДОВАТЕЛЬ: Почему вы не сообщили об этом раньше?\n\nМАРИЯ: Я не думала, что всё настолько серьёзно.\n\nПРИМЕЧАНИЕ: Мария подтверждает, что Иван опасался последствий своей проверки.",
+            meta: "ПОДОЗРЕВАЕМАЯ: МАРИЯ КРЫЛОВА"
+        }
+    ]
+},
+
+3: {
+    number: "CASE №003",
+    title: "Чужая подпись",
+    description: "Из организации пропала крупная сумма денег. Финансовые документы подтверждают проведение операций, однако сотрудник, чья подпись стоит на разрешениях, отрицает своё участие. Следствие должно установить, кто подделал документы и куда ушли средства.",
+
+    evidence: [
+        {
+            title: "Подпись на платёжном поручении",
+            description: "Спорная подпись в финансовом документе.",
+            body: "На платёжном поручении №784 обнаружена подпись сотрудника бухгалтерии Ольги Смирновой.\n\nОльга утверждает, что не подписывала документ.\n\nПочерковедческая экспертиза выявила отличия в наклоне букв и характере завершающего штриха.\n\nПредположительно, подпись могла быть скопирована с другого документа.",
+            meta: "ОБЪЕКТ: ПЛАТЁЖНОЕ ПОРУЧЕНИЕ №784"
+        },
+        {
+            title: "Флеш-накопитель",
+            description: "Носитель данных, найденный в кабинете.",
+            body: "В ящике рабочего стола обнаружен USB-накопитель.\n\nНа нём находятся сканы договоров, несколько таблиц и изображения подписей сотрудников.\n\nПоследний файл был создан за два дня до проведения спорной операции.\n\nИмя пользователя, сохранившего файл, совпадает с учётной записью секретаря Анастасии Волковой.",
+            meta: "ОБЪЕКТ: USB-НАКОПИТЕЛЬ / ЦИФРОВАЯ ЭКСПЕРТИЗА"
+        },
+        {
+            title: "Запись с камеры коридора",
+            description: "Перемещения сотрудников в день операции.",
+            body: "Камера коридора зафиксировала посещение финансового отдела.\n\n09:15 — Ольга Смирнова вошла в кабинет.\n10:02 — Игорь Васильев покинул помещение.\n10:28 — Анастасия Волкова вошла в кабинет.\n11:04 — Сергей Павлов вышел из здания.\n\nЗапись из самого кабинета отсутствует.",
+            meta: "ОБЪЕКТ: ВИДЕОЗАПИСЬ / КАМЕРА №07"
+        },
+        {
+            title: "Черновик договора",
+            description: "Неутверждённая версия документа с исправлениями.",
+            body: "В архиве найден черновик договора с подрядчиком.\n\nВ документе указаны реквизиты, отличающиеся от реквизитов в официальной версии.\n\nИзменения были внесены за день до перевода средств.\n\nВ свойствах файла указано, что последним редактором был пользователь с именем «admin-office».\n\nЛичность пользователя ещё предстоит установить.",
+            meta: "ОБЪЕКТ: ЭЛЕКТРОННЫЙ ДОКУМЕНТ / ЧЕРНОВИК"
+        }
+    ],
+
+    documents: [
+        {
+            title: "Банковская выписка",
+            description: "Движение денежных средств организации.",
+            body: "В течение трёх дней со счёта организации были выполнены четыре перевода.\n\nПолучатель — компания, ранее не сотрудничавшая с организацией.\n\nОбщая сумма переводов превышает установленный лимит.\n\nВсе операции были проведены на основании платёжных поручений с подписью Ольги Смирновой.\n\nБанк подтвердил исполнение операций.",
+            meta: "ДОКУМЕНТ: БАНКОВСКАЯ ВЫПИСКА"
+        },
+        {
+            title: "Договор с подрядчиком",
+            description: "Официальное соглашение о выполнении работ.",
+            body: "Договор заключён между организацией и компанией «ТехноСервис».\n\nПредмет соглашения — обслуживание серверного оборудования.\n\nСтоимость услуг значительно превышает среднюю рыночную цену.\n\nВ приложении отсутствует подробная смета работ.\n\nПодпись подрядчика визуально отличается от подписи в предыдущих договорах.",
+            meta: "ДОКУМЕНТ: ДОГОВОР №TS-091"
+        },
+        {
+            title: "Внутренний аудит",
+            description: "Отчёт о проверке финансовых операций.",
+            body: "В ходе внутренней проверки обнаружены нарушения процедуры согласования платежей.\n\nНесколько операций проведены без подтверждения второго ответственного лица.\n\nДоступ к платёжной системе имели финансовый директор Игорь Васильев и бухгалтер Ольга Смирнова.\n\nЖурнал изменений за соответствующий период частично отсутствует.",
+            meta: "ДОКУМЕНТ: ОТЧЁТ ВНУТРЕННЕГО АУДИТА"
+        },
+        {
+            title: "Переписка сотрудников",
+            description: "Рабочие сообщения перед проведением переводов.",
+            body: "АНАСТАСИЯ: Документы готовы. Осталось проверить подписи.\n\nИГОРЬ: Проверь, чтобы версии совпадали.\n\nАНАСТАСИЯ: В старом архиве есть нужные сканы.\n\nИГОРЬ: Не обсуждай это в общем чате.\n\nСообщения отправлены за день до первого перевода.\n\nКонтекст переписки требует дополнительной проверки.",
+            meta: "ДОКУМЕНТ: ВЫГРУЗКА РАБОЧЕГО ЧАТА"
+        }
+    ],
+
+    interrogations: [
+        {
+            title: "Допрос: Игорь Васильев",
+            description: "Финансовый директор.",
+            body: "СЛЕДОВАТЕЛЬ: Кто согласовывал переводы?\n\nВАСИЛЬЕВ: Все операции проходили через бухгалтерию.\n\nСЛЕДОВАТЕЛЬ: Вы проверяли документы лично?\n\nВАСИЛЬЕВ: Я подписывал общие отчёты, но не каждое поручение.\n\nСЛЕДОВАТЕЛЬ: Почему сумма договоров такая высокая?\n\nВАСИЛЬЕВ: Это условия подрядчика. Я не занимался расчётами.\n\nСЛЕДОВАТЕЛЬ: Вы общались с Анастасией по поводу подписей?\n\nВАСИЛЬЕВ: Только по рабочим вопросам.\n\nПРИМЕЧАНИЕ: Васильев перекладывает ответственность на бухгалтерию.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: ИГОРЬ ВАСИЛЬЕВ"
+        },
+        {
+            title: "Допрос: Ольга Смирнова",
+            description: "Бухгалтер организации.",
+            body: "СЛЕДОВАТЕЛЬ: Вы подписывали платёжные поручения?\n\nСМИРНОВА: Нет. Подпись на документах не моя.\n\nСЛЕДОВАТЕЛЬ: У кого был доступ к вашим документам?\n\nСМИРНОВА: У финансового директора и секретаря. Они могли просматривать архив.\n\nСЛЕДОВАТЕЛЬ: Вы замечали подозрительные операции?\n\nСМИРНОВА: Да, но мне сказали, что всё согласовано.\n\nСЛЕДОВАТЕЛЬ: Кто именно?\n\nСМИРНОВА: Игорь Васильев.\n\nПРИМЕЧАНИЕ: Смирнова отрицает подпись и указывает на доступ других сотрудников к архиву.",
+            meta: "ПОДОЗРЕВАЕМАЯ: ОЛЬГА СМИРНОВА"
+        },
+        {
+            title: "Допрос: Анастасия Волкова",
+            description: "Секретарь организации.",
+            body: "СЛЕДОВАТЕЛЬ: Почему на флешке найдены сканы подписей?\n\nВОЛКОВА: Я готовила документы для архива.\n\nСЛЕДОВАТЕЛЬ: Вы знали о переводах?\n\nВОЛКОВА: Нет, я только передавала документы.\n\nСЛЕДОВАТЕЛЬ: Почему вы заходили в финансовый отдел?\n\nВОЛКОВА: Игорь попросил принести бумаги.\n\nСЛЕДОВАТЕЛЬ: Вы копировали подпись Ольги?\n\nВОЛКОВА: Нет. Я не занималась платёжными поручениями.\n\nПРИМЕЧАНИЕ: Необходимо выяснить, кто попросил Анастасию подготовить сканы.",
+            meta: "ПОДОЗРЕВАЕМАЯ: АНАСТАСИЯ ВОЛКОВА"
+        },
+        {
+            title: "Допрос: Сергей Павлов",
+            description: "Представитель подрядчика.",
+            body: "СЛЕДОВАТЕЛЬ: Вы подтверждаете получение денег?\n\nПАВЛОВ: Да, компания получила оплату за услуги.\n\nСЛЕДОВАТЕЛЬ: Какие именно услуги были выполнены?\n\nПАВЛОВ: Обслуживание оборудования и консультации.\n\nСЛЕДОВАТЕЛЬ: Почему в договоре нет подробной сметы?\n\nПАВЛОВ: Документы готовила ваша организация.\n\nСЛЕДОВАТЕЛЬ: Вы лично встречались с Васильевым?\n\nПАВЛОВ: Один раз, обсуждали условия договора.\n\nПРИМЕЧАНИЕ: Павлов подтверждает получение денег, но не предоставляет подробностей о выполненных работах.",
+            meta: "ПОДОЗРЕВАЕМЫЙ: СЕРГЕЙ ПАВЛОВ"
+        }
+    ]
+}
+};
+
+
+// Краткие карточки подозреваемых. Полные досье находятся в suspect.html.
+const suspectProfiles = {
+    1: [
+        { title: "Дмитрий Орлов", description: "42 года · Финансовый директор · Деловой партнёр Андрея Волкова." },
+        { title: "Елена Морозова", description: "35 лет · Личный помощник · Бывшая девушка погибшего." },
+        { title: "Максим Соколов", description: "29 лет · Системный администратор · Имел технический доступ к инфраструктуре компании." },
+        { title: "Алексей Громов", description: "38 лет · Бывший деловой партнёр · Сосед погибшего." }
+    ],
+    2: [
+        { title: "Антон Беляев", description: "31 год · Коллега Ивана · Работал с ним в одной организации." },
+        { title: "Олег Миронов", description: "46 лет · Руководитель организации · Был связан с финансовыми отчётами." },
+        { title: "Павел Денисов", description: "34 года · Друг детства Ивана · Сотрудник отдела логистики." },
+        { title: "Мария Крылова", description: "39 лет · Сестра пропавшего · Поддерживала с Иваном регулярное общение." }
+    ],
+    3: [
+        { title: "Игорь Васильев", description: "44 года · Финансовый менеджер · Имел доступ к финансовым операциям." },
+        { title: "Ольга Смирнова", description: "36 лет · Главный бухгалтер · Отрицает подписание спорного документа." },
+        { title: "Анастасия Волкова", description: "32 года · Юрист компании · Работала с договорами и документами." },
+        { title: "Сергей Павлов", description: "40 лет · Представитель подрядчика · Связан с компанией-получателем платежей." }
+    ]
+};
+
+// Получаем номер дела из адресной строки
+const params = new URLSearchParams(window.location.search);
+const caseId = Number(params.get("id")) || 1;
+const currentCase = allCases[caseId] || allCases[1];
+
+// Ссылка назад сохраняет номер дела
+document.getElementById("backLink").href = `case.html?id=${caseId}`;
+
+// Заполняем информацию о деле
+document.getElementById("caseNumber").textContent = currentCase.number;
+document.getElementById("caseTitle").textContent = currentCase.title;
+document.getElementById("caseDescription").textContent = currentCase.description;
+document.title = `CASEFILES — ${currentCase.title}`;
+
+// Состояние расследования
+const storageKey = `casefiles_progress_${caseId}`;
+const notesKey = `casefiles_notes_${caseId}`;
+
+let savedProgress = JSON.parse(localStorage.getItem(storageKey) || "{}");
+let currentTab = "evidence";
+let openedMaterial = null;
+const interrogationKey = `casefiles_interrogations_${caseId}`;
+let interrogationProgress = JSON.parse(localStorage.getItem(interrogationKey) || "{}");
+let activeInterrogation = null;
+
+function saveInterrogationProgress() {
+    localStorage.setItem(interrogationKey, JSON.stringify(interrogationProgress));
+}
+
+// Превращаем исходную стенограмму в пары «вопрос — ответ».
+function parseInterrogation(body) {
+    const lines = body.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const pairs = [];
+    let question = null;
+    let note = "";
+
+    for (const line of lines) {
+        if (line.startsWith("СЛЕДОВАТЕЛЬ:")) {
+            question = line.replace("СЛЕДОВАТЕЛЬ:", "").trim();
+        } else if (line.startsWith("ПРИМЕЧАНИЕ:")) {
+            note = line.replace("ПРИМЕЧАНИЕ:", "").trim();
+        } else if (question) {
+            const separator = line.indexOf(":");
+            if (separator !== -1) {
+                pairs.push({
+                    question,
+                    speaker: line.slice(0, separator).trim(),
+                    answer: line.slice(separator + 1).trim()
+                });
+                question = null;
+            }
+        }
+    }
+    return { pairs, note };
+}
+
+function renderInterrogation(item, index) {
+    const body = document.getElementById("modalBody");
+    const parsed = parseInterrogation(item.body);
+    const key = `interrogation_${index}`;
+    const saved = interrogationProgress[key] || [];
+    activeInterrogation = { key, item, parsed, index };
+    body.innerHTML = "";
+
+    const scene = document.createElement("div");
+    scene.className = "interrogation-scene";
+    const intro = document.createElement("p");
+    intro.className = "interrogation-intro";
+    intro.textContent = "Выберите вопрос следователя. Ответ подозреваемого появится в стенограмме. Можно задавать вопросы в любом порядке.";
+    scene.appendChild(intro);
+
+    const history = document.createElement("div");
+    history.className = "dialogue-history";
+    history.id = "dialogueHistory";
+    scene.appendChild(history);
+
+    const title = document.createElement("div");
+    title.className = "questions-title";
+    title.textContent = `ВОПРОСЫ ДЛЯ ДОПРОСА — ${saved.length} / ${parsed.pairs.length}`;
+    scene.appendChild(title);
+
+    const questionList = document.createElement("div");
+    questionList.className = "question-list";
+    questionList.id = "questionList";
+    parsed.pairs.forEach((pair, questionIndex) => {
+        const button = document.createElement("button");
+        button.className = "question-button";
+        button.textContent = `${String(questionIndex + 1).padStart(2, "0")}. ${pair.question}`;
+        button.disabled = saved.includes(questionIndex);
+        button.addEventListener("click", () => askInterrogationQuestion(questionIndex));
+        questionList.appendChild(button);
+    });
+    scene.appendChild(questionList);
+
+    if (saved.length === parsed.pairs.length) {
+        const done = document.createElement("div");
+        done.className = "interrogation-finish";
+        done.textContent = "Допрос завершён. Все вопросы заданы, стенограмма сохранена.";
+        scene.appendChild(done);
+    }
+
+    if (parsed.note) {
+        const note = document.createElement("div");
+        note.className = "interrogation-note";
+        note.textContent = `ЗАМЕТКА СЛЕДОВАТЕЛЯ: ${parsed.note}`;
+        scene.appendChild(note);
+    }
+
+    body.appendChild(scene);
+    // Восстанавливаем ранее открытые реплики.
+    saved.forEach(questionIndex => appendDialogue(parsed.pairs[questionIndex]));
+}
+
+function appendDialogue(pair) {
+    const history = document.getElementById("dialogueHistory");
+    if (!history) return;
+    const question = document.createElement("div");
+    question.className = "dialogue-line investigator";
+    const questionSpeaker = document.createElement("span");
+    questionSpeaker.className = "dialogue-speaker";
+    questionSpeaker.textContent = "СЛЕДОВАТЕЛЬ";
+    question.append(questionSpeaker, document.createTextNode(pair.question));
+
+    const answer = document.createElement("div");
+    answer.className = "dialogue-line suspect";
+    const answerSpeaker = document.createElement("span");
+    answerSpeaker.className = "dialogue-speaker";
+    answerSpeaker.textContent = pair.speaker;
+    answer.append(answerSpeaker, document.createTextNode(pair.answer));
+    history.append(question, answer);
+}
+
+function askInterrogationQuestion(questionIndex) {
+    if (!activeInterrogation) return;
+    const { key, parsed } = activeInterrogation;
+    const saved = interrogationProgress[key] || [];
+    if (saved.includes(questionIndex)) return;
+    saved.push(questionIndex);
+    interrogationProgress[key] = saved;
+    saveInterrogationProgress();
+    appendDialogue(parsed.pairs[questionIndex]);
+
+    const buttons = document.querySelectorAll("#questionList .question-button");
+    if (buttons[questionIndex]) buttons[questionIndex].disabled = true;
+    const title = document.querySelector(".questions-title");
+    if (title) title.textContent = `ВОПРОСЫ ДЛЯ ДОПРОСА — ${saved.length} / ${parsed.pairs.length}`;
+
+    if (saved.length === parsed.pairs.length) {
+        const done = document.createElement("div");
+        done.className = "interrogation-finish";
+        done.textContent = "Допрос завершён. Все вопросы заданы, стенограмма сохранена.";
+        document.querySelector(".interrogation-scene").appendChild(done);
+    }
+}
+
+const categories = {
+    evidence: "УЛИКА",
+    documents: "ДОКУМЕНТ",
+    interrogations: "ДОПРОС",
+    suspects: "ДОСЬЕ"
+};
+
+function saveProgress() {
+    localStorage.setItem(storageKey, JSON.stringify(savedProgress));
+}
+
+function isRead(id) {
+    return savedProgress[id] === true;
+}
+
+function updateProgress() {
+    const total = 12;
+    const completed = Object.values(savedProgress).filter(Boolean).length;
+    const percentage = Math.min((completed / total) * 100, 100);
+
+    document.getElementById("progressText").textContent =
+        `${completed} / ${total} ИЗУЧЕНО`;
+
+    document.getElementById("progressFill").style.width =
+        `${percentage}%`;
+}
+
+// Отображение карточек
+function renderMaterials(tab) {
+    const container = document.getElementById("materials");
+    container.innerHTML = "";
+
+    const items = tab === "suspects"
+        ? (suspectProfiles[caseId] || [])
+        : currentCase[tab];
+
+    if (!items) {
+        container.innerHTML = '<div class="empty-state">Материалы не найдены.</div>';
+        return;
+    }
+
+    items.forEach((item, index) => {
+        if (tab === "suspects") {
+            const card = document.createElement("article");
+            card.className = "material-card";
+
+            const top = document.createElement("div");
+            top.className = "material-top";
+
+            const number = document.createElement("span");
+            number.className = "material-number";
+            number.textContent = `ДОСЬЕ №0${index + 1}`;
+
+            const status = document.createElement("span");
+            status.className = "read-label";
+            status.textContent = "ДОСЬЕ ДОСТУПНО";
+
+            top.append(number, status);
+
+            const title = document.createElement("h3");
+            title.textContent = item.title;
+
+            const description = document.createElement("p");
+            description.textContent = item.description;
+
+            const open = document.createElement("div");
+            open.className = "open-label";
+            open.textContent = "ОТКРЫТЬ ДОСЬЕ →";
+
+            card.append(top, title, description, open);
+            card.addEventListener("click", () => {
+                window.location.href = `suspect.html?case=${caseId}&suspect=${index}`;
+            });
+
+            container.appendChild(card);
+            return;
+        }
+
+        const id = `${tab}_${index}`;
+        const read = isRead(id);
+
+        const card = document.createElement("article");
+        card.className = `material-card ${read ? "read" : ""}`;
+
+        const top = document.createElement("div");
+        top.className = "material-top";
+
+        const number = document.createElement("span");
+        number.className = "material-number";
+        number.textContent = `${categories[tab]} №0${index + 1}`;
+
+        const status = document.createElement("span");
+        status.className = "read-label";
+        status.textContent = read ? "ИЗУЧЕНО ✓" : "НЕ ИЗУЧЕНО";
+
+        top.append(number, status);
+
+        const title = document.createElement("h3");
+        title.textContent = item.title;
+
+        const description = document.createElement("p");
+        description.textContent = item.description;
+
+        const open = document.createElement("div");
+        open.className = "open-label";
+        open.textContent = tab === "interrogations" ? "НАЧАТЬ ДОПРОС →" : "ОТКРЫТЬ МАТЕРИАЛ →";
+
+        card.append(top, title, description, open);
+        card.addEventListener("click", () => openMaterial(tab, index));
+
+        container.appendChild(card);
+    });
+}
+
+// Переключение вкладок
+function showTab(tab) {
+    currentTab = tab;
+
+    document.querySelectorAll(".tab").forEach(button => {
+        button.classList.toggle("active", button.dataset.tab === tab);
+    });
+
+    const materials = document.getElementById("materials");
+    const notesSection = document.getElementById("notesSection");
+
+    if (tab === "notes") {
+        materials.style.display = "none";
+        notesSection.style.display = "block";
+    } else {
+        materials.style.display = "grid";
+        notesSection.style.display = "none";
+        renderMaterials(tab);
+    }
+}
+
+document.querySelectorAll(".tab").forEach(button => {
+    button.addEventListener("click", () => {
+        showTab(button.dataset.tab);
+    });
+});
+
+// Открытие материала
+function openMaterial(tab, index) {
+    const item = currentCase[tab][index];
+    const id = `${tab}_${index}`;
+
+    openedMaterial = { tab, index, id };
+
+    document.getElementById("modalCategory").textContent =
+        `${categories[tab]} / ${String(index + 1).padStart(2, "0")}`;
+
+    document.getElementById("modalTitle").textContent = item.title;
+    if (tab === "interrogations") {
+        renderInterrogation(item, index);
+    } else {
+        activeInterrogation = null;
+        document.getElementById("modalBody").textContent = item.body;
+    }
+    document.getElementById("modalMeta").textContent = item.meta;
+
+    const button = document.getElementById("markButton");
+    const read = isRead(id);
+
+    button.disabled = read;
+    button.textContent = read
+        ? "МАТЕРИАЛ УЖЕ ИЗУЧЕН ✓"
+        : "ОТМЕТИТЬ КАК ИЗУЧЕННОЕ";
+
+    document.getElementById("materialModal").classList.add("show");
+}
+
+// Закрытие окна
+function closeModal() {
+    document.getElementById("materialModal").classList.remove("show");
+    openedMaterial = null;
+    activeInterrogation = null;
+}
+
+document.getElementById("closeModal").addEventListener("click", closeModal);
+
+document.getElementById("materialModal").addEventListener("click", event => {
+    if (event.target.id === "materialModal") {
+        closeModal();
+    }
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeModal();
+});
+
+// Отметка изученного материала
+document.getElementById("markButton").addEventListener("click", () => {
+    if (!openedMaterial) return;
+
+    savedProgress[openedMaterial.id] = true;
+    saveProgress();
+    updateProgress();
+
+    const button = document.getElementById("markButton");
+    button.disabled = true;
+    button.textContent = "МАТЕРИАЛ ИЗУЧЕН ✓";
+
+    renderMaterials(currentTab);
+});
+
+// Заметки: отдельные для каждого дела
+const notes = document.getElementById("notes");
+const saveStatus = document.getElementById("saveStatus");
+
+notes.value = localStorage.getItem(notesKey) || "";
+
+notes.addEventListener("input", () => {
+    localStorage.setItem(notesKey, notes.value);
+    saveStatus.textContent = "ЗАМЕТКИ СОХРАНЕНЫ";
+});
+
+// Переход на доску расследования
+document.getElementById("openBoard").addEventListener("click", () => {
+    window.location.href = `board.html?id=${caseId}`;
+});
+
+// Переход к финальной версии расследования
+document.getElementById("finishInvestigation").addEventListener("click", () => {
+    const completed = Object.values(savedProgress).filter(Boolean).length;
+
+    if (completed < 12) {
+        const proceed = confirm(
+            `Из 12 материалов изучено ${completed}.
+
+Рекомендуется изучить все материалы перед вынесением версии. Всё равно перейти к финалу?`
+        );
+        if (!proceed) return;
+    }
+
+    window.location.href = `verdict.html?id=${caseId}`;
+});
+
+// Полный сброс прохождения всех дел CASEFILES.
+document.getElementById("resetProgress").addEventListener("click", () => {
+    const confirmed = confirm(
+        "Сбросить ВСЁ прохождение?\n\nБудут удалены изученные материалы, ответы в допросах, заметки, связи на доске и результаты финальных версий по всем трём делам. Это действие нельзя отменить."
+    );
+
+    if (!confirmed) return;
+
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("casefiles_")) keysToRemove.push(key);
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    alert("Всё прохождение очищено. Можно начинать расследование заново.");
+    window.location.href = `investigation.html?id=${caseId}`;
+});
+
+// Первоначальная загрузка
+updateProgress();
+renderMaterials("evidence");
+</script>
+
+</body>
+</html>

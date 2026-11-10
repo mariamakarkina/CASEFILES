@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CaseFiles — интерактивная платформа криминальных расследований">
+    <title>CASEFILES — Архив расследований</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo">CASE<span>FILES</span></a>
+
+            <nav class="navigation">
+                <a href="#home">Главная</a>
+                <a href="#cases">Архив дел</a>
+                <a href="#about">О проекте</a>
+            </nav>
+
+            <a href="#cases" class="header-link">Открыть архив ↗</a>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero" id="home">
+            <div class="hero-background"></div>
+
+            <div class="container hero-inner">
+                <div class="hero-content">
+                    <div class="eyebrow">
+                        <span class="status-dot"></span>
+                        PRIVATE INVESTIGATION DATABASE
+                    </div>
+
+                    <h1>
+                        КАЖДАЯ<br>
+                        ДЕТАЛЬ <span>ИМЕЕТ</span><br>
+                        ЗНАЧЕНИЕ.
+                    </h1>
+
+                    <p class="hero-description">
+                        Три нераскрытых дела. Десятки улик.
+                        Сотни вопросов. Сможешь ли ты докопаться
+                        до правды?
+                    </p>
+
+                    <a href="#cases" class="primary-button">
+                        НАЧАТЬ РАССЛЕДОВАНИЕ <span>→</span>
+                    </a>
+                </div>
+
+                <div class="hero-stamp">
+                    <span>CF</span>
+                    <small>CLASSIFIED<br>ARCHIVE</small>
+                </div>
+
+                <div class="hero-bottom">
+                    <span>EST. 2026</span>
+                    <span>ARCHIVE № 001 — 003</span>
+                    <span>MOSCOW / RUSSIA</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="cases-section" id="cases">
+            <div class="container">
+
+                <div class="section-top">
+                    <div>
+                        <p class="section-label">01 / DATABASE</p>
+                        <h2>АРХИВ <span>ДЕЛ</span></h2>
+                    </div>
+
+                    <p class="section-note">
+                        Выбери дело, изучи материалы<br>
+                        и найди того, кто виновен.
+                    </p>
+                </div>
+
+                <div class="cases-grid">
+
+                    <article class="case-card">
+                        <div class="case-visual visual-one">
+                            <span class="case-number">CASE № 001</span>
+                            <span class="case-tag">MURDER</span>
+                            <div class="visual-symbol">01</div>
+                        </div>
+
+                        <div class="case-body">
+                            <div class="case-meta">
+                                <span>УБИЙСТВО</span>
+                                <span>12.10.2026</span>
+                            </div>
+
+                            <h3>Последний звонок</h3>
+
+                            <p>
+                                Владелец IT-компании найден мёртвым
+                                в собственной квартире. Последний
+                                звонок скрывает больше, чем кажется.
+                            </p>
+
+                            <button class="case-button" onclick="openCase(1)">
+                                ОТКРЫТЬ ДЕЛО <span>↗</span>
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="case-card">
+                        <div class="case-visual visual-two">
+                            <span class="case-number">CASE № 002</span>
+                            <span class="case-tag">MISSING</span>
+                            <div class="visual-symbol">02</div>
+                        </div>
+
+                        <div class="case-body">
+                            <div class="case-meta">
+                                <span>ИСЧЕЗНОВЕНИЕ</span>
+                                <span>21.10.2026</span>
+                            </div>
+
+                            <h3>Исчезновение</h3>
+
+                            <p>
+                                Сотрудник частной организации
+                                исчез после рабочего дня.
+                                Его телефон был найден выключенным.
+                            </p>
+
+                            <button class="case-button" onclick="openCase(2)">
+                                ОТКРЫТЬ ДЕЛО <span>↗</span>
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="case-card">
+                        <div class="case-visual visual-three">
+                            <span class="case-number">CASE № 003</span>
+                            <span class="case-tag">FRAUD</span>
+                            <div class="visual-symbol">03</div>
+                        </div>
+
+                        <div class="case-body">
+                            <div class="case-meta">
+                                <span>МОШЕННИЧЕСТВО</span>
+                                <span>02.11.2026</span>
+                            </div>
+
+                            <h3>Чужая подпись</h3>
+
+                            <p>
+                                Из организации пропали крупные суммы.
+                                Документы оформлены правильно,
+                                но подпись вызывает сомнения.
+                            </p>
+
+                            <button class="case-button" onclick="openCase(3)">
+                                ОТКРЫТЬ ДЕЛО <span>↗</span>
+                            </button>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section" id="about">
+            <div class="container about-inner">
+                <div>
+                    <p class="section-label">02 / ABOUT PROJECT</p>
+                    <h2>ПРАВДА<br>СКРЫТА В <span>ДЕТАЛЯХ.</span></h2>
+                </div>
+
+                <div class="about-text">
+                    <p>
+                        CASEFILES — интерактивная криминальная
+                        платформа, где ты становишься следователем.
+                    </p>
+
+                    <p>
+                        Изучай документы, анализируй переписки,
+                        сопоставляй показания и находи противоречия.
+                        Здесь недостаточно просто угадать виновного —
+                        нужно доказать свою версию.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <a href="#" class="logo">CASE<span>FILES</span></a>
+            <p>ALL CASES ARE FICTIONAL · 2026</p>
+            <span>END OF FILE</span>
+        </div>
+    </footer>
+
+    <script src="./js/script.js"></script>
+
+</body>
+</html>

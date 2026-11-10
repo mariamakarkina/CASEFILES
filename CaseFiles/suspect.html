@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Досье подозреваемого — CASEFILES</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg: #09090b;
+    --panel: #131316;
+    --panel2: #19191e;
+    --border: #2b2b31;
+    --red: #a32635;
+    --red-light: #d04450;
+    --text: #eeeeef;
+    --muted: #929299;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+}
+
+header {
+    height: 76px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7%;
+}
+
+.logo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 3px;
+}
+
+.logo span { color: var(--red-light); }
+
+.back {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+}
+
+.back:hover { color: white; }
+
+.container {
+    width: min(1100px, 88%);
+    margin: 55px auto;
+}
+
+.eyebrow {
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin: 12px 0;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.profile {
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    gap: 35px;
+    margin-top: 40px;
+}
+
+.portrait {
+    min-height: 420px;
+    background:
+        radial-gradient(circle at 50% 30%, #414149 0, #222228 28%, #111114 68%);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.portrait::after {
+    content: "CASEFILES / PERSON OF INTEREST";
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    color: #77777e;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.initials {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 100px;
+    color: #77777e;
+    font-weight: 600;
+    text-shadow: 0 10px 40px #000;
+}
+
+.profile-info {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 30px;
+}
+
+.name {
+    font-size: 31px;
+    margin: 0 0 8px;
+}
+
+.profession {
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 25px;
+}
+
+.status {
+    display: inline-block;
+    padding: 7px 10px;
+    border: 1px solid #71303a;
+    color: #e17b85;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.detail {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.detail-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+}
+
+.detail-value { font-size: 14px; }
+
+.section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 25px 28px;
+    margin-top: 18px;
+}
+
+.section h2 {
+    font-size: 15px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    color: var(--red-light);
+    margin: 0 0 15px;
+}
+
+.section p {
+    color: #c3c3c8;
+    line-height: 1.8;
+    font-size: 14px;
+    margin: 0;
+}
+
+.warning {
+    border-left: 3px solid var(--red);
+    background: #1a1114;
+    padding: 18px 20px;
+    margin-top: 20px;
+}
+
+.warning strong {
+    display: block;
+    color: var(--red-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.warning p {
+    color: #c3b7ba;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0;
+}
+
+footer {
+    border-top: 1px solid var(--border);
+    margin-top: 70px;
+    padding: 25px 7%;
+    color: #66666d;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 750px) {
+    header { padding: 0 5%; }
+    .container { width: 90%; margin-top: 35px; }
+    .profile { grid-template-columns: 1fr; }
+    .portrait { min-height: 300px; }
+    .profile-info { padding: 22px; }
+    .details { grid-template-columns: 1fr 1fr; }
+    .name { font-size: 25px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">CASE<span>FILES</span></div>
+    <a class="back" id="backLink" href="#">← НАЗАД К РАССЛЕДОВАНИЮ</a>
+</header>
+
+<main class="container">
+    <div class="eyebrow" id="caseNumber">CASE №001 / PERSON DATABASE</div>
+    <h1>Досье подозреваемого</h1>
+    <p class="subtitle">Закрытая информация из материалов уголовного дела. Некоторые сведения могут быть неполными или противоречивыми.</p>
+
+    <div class="profile">
+        <div class="portrait">
+            <div class="initials" id="initials">?</div>
+        </div>
+
+        <div class="profile-info">
+            <h2 class="name" id="name">Загрузка...</h2>
+            <div class="profession" id="profession"></div>
+            <div class="status">ЛИЦО, ПРЕДСТАВЛЯЮЩЕЕ ИНТЕРЕС</div>
+
+            <div class="details">
+                <div class="detail">
+                    <div class="detail-label">Возраст</div>
+                    <div class="detail-value" id="age"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Пол</div>
+                    <div class="detail-value" id="gender"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Отношение к делу</div>
+                    <div class="detail-value" id="relation"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Статус алиби</div>
+                    <div class="detail-value" id="alibiStatus"></div>
+                </div>
+            </div>
+
+            <div class="section" style="padding:0; border:0; background:transparent;">
+                <h2>КРАТКАЯ БИОГРАФИЯ</h2>
+                <p id="bio"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>АЛИБИ</h2>
+        <p id="alibi"></p>
+    </div>
+
+    <div class="section">
+        <h2>ВОЗМОЖНЫЙ МОТИВ</h2>
+        <p id="motive"></p>
+    </div>
+
+    <div class="section">
+        <h2>ПОКАЗАНИЯ</h2>
+        <p id="statement"></p>
+    </div>
+
+    <div class="warning">
+        <strong>ПРИМЕЧАНИЕ СЛЕДОВАТЕЛЯ</strong>
+        <p id="note"></p>
+    </div>
+</main>
+
+<footer>
+    CASEFILES INVESTIGATION SYSTEM — CONFIDENTIAL DATABASE
+</footer>
+
+<script>
+const suspects = {
+    1: [
+        {
+            name: "Дмитрий Орлов",
+            age: 42,
+            gender: "Мужской",
+            profession: "Финансовый директор",
+            relation: "Деловой партнёр",
+            alibiStatus: "Не подтверждено",
+            bio: "Более десяти лет работал вместе с Андреем Волковым. Занимался финансовыми вопросами компании и имел доступ к внутренней документации. В последнее время отношения между партнёрами заметно ухудшились.",
+            alibi: "Утверждает, что вечером находился дома. Однако точное время его возвращения не подтверждено. Камеры наблюдения зафиксировали его автомобиль неподалёку от дома Волкова.",
+            motive: "Между Орловым и Волковым возник серьёзный финансовый конфликт. Орлов опасался потерять свою долю в компании и влияние на её управление.",
+            statement: "«У нас действительно были разногласия, но это обычная ситуация для бизнеса. Я не видел Андрея в тот вечер и не имею отношения к его смерти».",
+            note: "Показания Орлова частично противоречат данным о перемещении его автомобиля. Необходимо проверить временную последовательность событий."
+        },
+        {
+            name: "Елена Морозова",
+            age: 35,
+            gender: "Женский",
+            profession: "Личный помощник директора",
+            relation: "Сотрудница компании",
+            alibiStatus: "Частично подтверждено",
+            bio: "Работала личным помощником Андрея Волкова около четырёх лет. Имела доступ к его расписанию, переписке и некоторым служебным документам.",
+            alibi: "Сообщила, что после окончания рабочего дня отправилась домой. Время ухода из офиса подтверждается пропускной системой, но дальнейшее местонахождение точно не установлено.",
+            motive: "Могла опасаться увольнения после недавнего конфликта с руководителем. Также могла располагать информацией о внутренних проблемах компании.",
+            statement: "«Андрей был требовательным человеком. В последнее время он нервничал, но я не знаю, что именно произошло».",
+            note: "Имеет доступ к информации о распорядке Волкова. Прямых доказательств причастности к преступлению пока нет."
+        },
+        {
+            name: "Максим Соколов",
+            age: 29,
+            gender: "Мужской",
+            profession: "Системный администратор",
+            relation: "Сотрудник компании",
+            alibiStatus: "Проверяется",
+            bio: "Отвечал за компьютерную инфраструктуру компании. Имел технический доступ к внутренней сети, серверам и системе видеонаблюдения.",
+            alibi: "Утверждает, что вечером занимался личными делами. Независимых подтверждений его местонахождения в указанный период пока недостаточно.",
+            motive: "Мог быть недоволен условиями работы и отношением руководства. Его технические полномочия позволяли получать доступ к некоторым внутренним данным.",
+            statement: "«Я не вмешивался в дела директора. Моя работа — поддерживать оборудование, а не решать финансовые проблемы компании».",
+            note: "Следует проверить журналы доступа к серверу и системе видеонаблюдения."
+        },
+        {
+            name: "Алексей Громов",
+            age: 38,
+            gender: "Мужской",
+            profession: "Бывший деловой партнёр",
+            relation: "Бывший партнёр",
+            alibiStatus: "Не подтверждено",
+            bio: "Ранее участвовал в развитии компании Волкова, однако несколько лет назад прекратил сотрудничество после серьёзного спора.",
+            alibi: "Сообщил, что в день происшествия находился за городом. Документальных подтверждений поездки следствие пока не получило.",
+            motive: "Сохранял неприязненные отношения с Волковым из-за старого делового конфликта и возможных финансовых претензий.",
+            statement: "«Мы давно не общались. Всё, что было между нами, осталось в прошлом. Мне незачем было встречаться с ним».",
+            note: "Нужно установить, поддерживал ли Громов контакты с Волковым в последние недели."
+        }
+    ],
+    2: [
+        {
+            name: "Антон Беляев",
+            age: 31,
+            gender: "Мужской",
+            profession: "Коллега пропавшего",
+            relation: "Работал с Иваном",
+            alibiStatus: "Частично подтверждено",
+            bio: "Работал вместе с Иваном Крыловым в одной организации. Знал его рабочие привычки и круг общения.",
+            alibi: "Утверждает, что после работы сразу отправился домой. Часть его маршрута подтверждается данными транспорта.",
+            motive: "Возможные рабочие разногласия и конкуренция за повышение.",
+            statement: "«Иван в последнее время был каким-то напряжённым. Но я не знаю, куда он мог исчезнуть».",
+            note: "Следует проверить последние контакты Беляева с пропавшим."
+        },
+        {
+            name: "Олег Миронов",
+            age: 46,
+            gender: "Мужской",
+            profession: "Руководитель организации",
+            relation: "Начальник Ивана",
+            alibiStatus: "Сомнительное",
+            bio: "Руководил подразделением, в котором работал Иван Крылов. Контролировал финансовые отчёты и внутренние процессы организации.",
+            alibi: "Сообщил, что после рабочего дня уехал домой. Однако сведения о его перемещениях в нужный период требуют дополнительной проверки.",
+            motive: "Иван мог обнаружить финансовые нарушения организации. Исчезновение сотрудника могло помочь скрыть следы этих нарушений.",
+            statement: "«Крылов был хорошим специалистом. У нас не было серьёзных конфликтов. Я не понимаю, почему вы задаёте мне эти вопросы».",
+            note: "В показаниях Миронова обнаружены несоответствия относительно последних часов пребывания Ивана в офисе."
+        },
+        {
+            name: "Павел Денисов",
+            age: 34,
+            gender: "Мужской",
+            profession: "Сотрудник отдела логистики",
+            relation: "Знакомый Ивана",
+            alibiStatus: "Проверяется",
+            bio: "Работал в логистическом отделе и периодически взаимодействовал с Крыловым по рабочим вопросам.",
+            alibi: "Утверждает, что в день исчезновения находился на рабочем месте до позднего вечера.",
+            motive: "Возможные разногласия по рабочим вопросам. Мог быть связан с перемещениями служебного транспорта.",
+            statement: "«Мы пересекались по работе, но близкими друзьями не были. Последний раз я видел Ивана в офисе».",
+            note: "Необходимо проверить использование служебного транспорта и рабочие журналы."
+        },
+        {
+            name: "Мария Крылова",
+            age: 39,
+            gender: "Женский",
+            profession: "Родственница пропавшего",
+            relation: "Сестра Ивана",
+            alibiStatus: "Частично подтверждено",
+            bio: "Сестра Ивана Крылова. Поддерживала с ним регулярное общение и знала о его личных и рабочих проблемах.",
+            alibi: "Утверждает, что в день исчезновения находилась дома. Переписка с Иваном подтверждает, что они общались незадолго до его исчезновения.",
+            motive: "Возможные семейные разногласия и вопросы, связанные с личными финансами.",
+            statement: "«Иван никогда не пропадал без предупреждения. Я уверена, что с ним что-то случилось».",
+            note: "Следует изучить переписку родственников и установить, были ли у них конфликты."
+        }
+    ],
+    3: [
+        {
+            name: "Игорь Васильев",
+            age: 44,
+            gender: "Мужской",
+            profession: "Финансовый менеджер",
+            relation: "Сотрудник организации",
+            alibiStatus: "Не подтверждено",
+            bio: "Отвечал за финансовые операции и взаимодействие с подрядчиками. Имел доступ к документам, связанным с переводами денежных средств.",
+            alibi: "Сообщил, что в день пропажи денег работал с обычными финансовыми документами. Его действия в системе требуют проверки.",
+            motive: "Мог организовать хищение денег через фиктивный договор с подрядчиком и попытаться скрыть операцию.",
+            statement: "«Все переводы проходили в установленном порядке. Я не понимаю, почему ответственность пытаются переложить на меня».",
+            note: "Особое внимание следует уделить истории переводов и документам, оформленным от имени других сотрудников."
+        },
+        {
+            name: "Ольга Смирнова",
+            age: 36,
+            gender: "Женский",
+            profession: "Главный бухгалтер",
+            relation: "Ответственная за отчётность",
+            alibiStatus: "Проверяется",
+            bio: "Вела бухгалтерскую отчётность организации и имела доступ к финансовым документам.",
+            alibi: "Утверждает, что не подписывала спорный договор. В день происшествия работала с отчётностью.",
+            motive: "Могла быть заинтересована в сокрытии ошибок в финансовой документации, однако прямых подтверждений этому нет.",
+            statement: "«Подпись на договоре похожа на мою, но я этого документа не подписывала».",
+            note: "Необходимо провести экспертизу подписи и установить происхождение документа."
+        },
+        {
+            name: "Анастасия Волкова",
+            age: 32,
+            gender: "Женский",
+            profession: "Юрист компании",
+            relation: "Сотрудница организации",
+            alibiStatus: "Частично подтверждено",
+            bio: "Занималась договорами, юридической проверкой документов и сопровождением сделок с подрядчиками.",
+            alibi: "Утверждает, что не участвовала в оформлении спорного договора. Часть её рабочего времени подтверждается служебной перепиской.",
+            motive: "Могла быть заинтересована в сокрытии нарушений при оформлении договоров.",
+            statement: "«Я проверяю документы, которые мне передают. Но не могу отвечать за действия других сотрудников».",
+            note: "Следует установить, кто передал ей документы и кто имел право согласовать спорную сделку."
+        },
+        {
+            name: "Сергей Павлов",
+            age: 40,
+            gender: "Мужской",
+            profession: "Представитель подрядчика",
+            relation: "Внешний контрагент",
+            alibiStatus: "Не подтверждено",
+            bio: "Представлял компанию-подрядчика, которая участвовала в нескольких сделках с организацией.",
+            alibi: "Утверждает, что занимался текущими делами своей компании. Его присутствие в офисе организации в нужный день не подтверждено.",
+            motive: "Мог получить выгоду от фиктивного договора или участвовать в выводе денежных средств.",
+            statement: "«Наша компания выполняла договорные обязательства. Я не имею отношения к внутренним проблемам заказчика».",
+            note: "Необходимо проверить существование подрядчика, реальность оказанных услуг и движение денежных средств."
+        }
+    ]
+};
+
+const params = new URLSearchParams(window.location.search);
+const caseId = Number(params.get("case") || 1);
+const suspectId = Number(params.get("suspect") || 0);
+
+const currentCase = suspects[caseId];
+const person = currentCase ? currentCase[suspectId] : null;
+
+if (!person) {
+    document.getElementById("name").textContent = "Досье не найдено";
+    document.getElementById("profession").textContent = "Проверьте адрес страницы";
+    document.getElementById("bio").textContent =
+        "Не удалось найти подозреваемого. Вернитесь к расследованию и выберите профиль ещё раз.";
+} else {
+    document.title = person.name + " — CASEFILES";
+
+    document.getElementById("caseNumber").textContent =
+        `CASE №00${caseId} / PERSON DATABASE`;
+
+    document.getElementById("name").textContent = person.name;
+    document.getElementById("profession").textContent = person.profession;
+    document.getElementById("age").textContent = person.age + " лет";
+    document.getElementById("gender").textContent = person.gender;
+    document.getElementById("relation").textContent = person.relation;
+    document.getElementById("alibiStatus").textContent = person.alibiStatus;
+
+    document.getElementById("bio").textContent = person.bio;
+    document.getElementById("alibi").textContent = person.alibi;
+    document.getElementById("motive").textContent = person.motive;
+    document.getElementById("statement").textContent = person.statement;
+    document.getElementById("note").textContent = person.note;
+
+    const initials = person.name
+        .split(" ")
+        .map(part => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+    document.getElementById("initials").textContent = initials;
+}
+
+document.getElementById("backLink").href =
+    `investigation.html?id=${caseId}`;
+</script>
+
+</body>
+</html>
